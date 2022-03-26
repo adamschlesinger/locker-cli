@@ -1,8 +1,17 @@
 [package]
 name = "locker-cli"
+description = "Asset management in Git for humans"
 version = "0.1.0"
 edition = "2021"
+repository = "https://github.com/adamschlesinger/locker-cli/"
+readme = "README.md"
+license = "MIT OR Apache-2.0"
+keywords = ["git", "lfs", "binaries", "assets"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+clap = { version = "3.1.6", features = ["derive"] }
+ctrlc = "3.2.1"
+confy = "0.4.0"
+exitcode = "1.1.2"
