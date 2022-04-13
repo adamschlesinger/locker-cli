@@ -1,6 +1,6 @@
 use clap::{ArgMatches, Args, Error, FromArgMatches, Parser, Subcommand};
 use trait_enum::trait_enum;
-use crate::commands::{ CLICommand, Claim, Admin };
+use crate::commands::*;
 
 mod lfs;
 mod commands;
@@ -14,25 +14,6 @@ struct LockerInterface {
     command: LockerCommand,
 }
 
-#[derive(Subcommand, Debug)]
-enum LockerCommandDEPRECATED {
-    /// todo
-    Admin(commands::Admin),
-
-    /// Unlock the specified file for you to work on; prevents other claims until returned. By
-    /// default also creates a new branch to work in
-    Claim(commands::Claim),
-
-    /// Lock a file, generate a PR, copy link to PR to clipboard
-    Return,
-
-    /// todo
-    Checkout,
-
-    /// Generate a commit of changes for all currently claimed files (default)
-    Commit
-}
-
 trait_enum!{
     #[derive(Subcommand, Debug)]
     pub enum LockerCommand: CLICommand {
@@ -41,7 +22,16 @@ trait_enum!{
 
         /// Unlock the specified file for you to work on; prevents other claims until returned. By
         /// default also creates a new branch to work in
-        Claim
+        Claim,
+
+        /// Lock a file, generate a PR, copy link to PR to clipboard
+        Return,
+
+        /// todo
+        Checkout,
+
+        /// Generate a commit of changes for all currently claimed files (default)
+        Commit
     }
 }
 
@@ -57,9 +47,8 @@ fn main() {
     // println!("{:#?}", cfg);
 
     let cli = LockerInterface::parse();
-    println!("{:?}", cli);
+    println!("##### {:?}", cli);
 
-    if let cmd = cli.command {
-        cmd.exec();
-    }
+    let deref: &dyn CLICommand = cli.command.deref();
+    deref.exec();
 }
