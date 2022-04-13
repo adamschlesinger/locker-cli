@@ -1,7 +1,11 @@
-use clap::{ArgMatches, Error, FromArgMatches, Parser, Subcommand, Args};
+use clap::{ArgMatches, Args, Error, FromArgMatches, Parser, Subcommand};
+use trait_enum::trait_enum;
+use crate::commands::{ CLICommand, Claim, Admin };
 
 mod lfs;
 mod commands;
+
+use std::ops::Deref;
 
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about = None)]
@@ -11,21 +15,34 @@ struct LockerInterface {
 }
 
 #[derive(Subcommand, Debug)]
-enum LockerCommand {
+enum LockerCommandDEPRECATED {
     /// todo
-    Admin,
+    Admin(commands::Admin),
 
     /// Unlock the specified file for you to work on; prevents other claims until returned. By
     /// default also creates a new branch to work in
-    Claim(commands::claim::Claim),
+    Claim(commands::Claim),
 
     /// Lock a file, generate a PR, copy link to PR to clipboard
     Return,
 
+    /// todo
     Checkout,
 
     /// Generate a commit of changes for all currently claimed files (default)
     Commit
+}
+
+trait_enum!{
+    #[derive(Subcommand, Debug)]
+    pub enum LockerCommand: CLICommand {
+        /// todo
+        Admin,
+
+        /// Unlock the specified file for you to work on; prevents other claims until returned. By
+        /// default also creates a new branch to work in
+        Claim
+    }
 }
 
 // #[derive(Debug, Serialize, Deserialize)]
@@ -42,26 +59,7 @@ fn main() {
     let cli = LockerInterface::parse();
     println!("{:?}", cli);
 
-    match &cli.command {
-        LockerCommand::Admin => {
-            println!("todo")
-        },
-        LockerCommand::Claim(baz) => {
-            let _output = lfs::lfs_cmd("push");
-
-            match _output {
-                Ok(out) => println!("{:?}", String::from_utf8(out.stdout)),
-                Err(e) => println!("error")
-            }
-        },
-        LockerCommand::Return => {
-            println!("todo")
-        },
-        LockerCommand::Commit => {
-            println!("todo")
-        },
-        _ => {
-            todo!();
-        }
+    if let cmd = cli.command {
+        cmd.exec();
     }
 }
