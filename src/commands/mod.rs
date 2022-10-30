@@ -1,14 +1,18 @@
 //! todo
 
 mod config;
+mod claim;
+mod save;
+mod checkout;
+mod r#return;
+mod commit;
+mod status;
 
-use clap::{Args, Command, Subcommand };
+use clap::{Args, Command, Subcommand};
 use crate::commands::config::show_config;
 use crate::lfs::*;
 
-
 /// Common trait for all subcommands
-/// so they can be executed
 pub trait CLICommand {
     fn exec(&self);
 }
@@ -16,45 +20,18 @@ pub trait CLICommand {
 /// todo
 #[derive(Args, Debug)]
 pub struct Claim {
-    /// File or directory with multiple claimable files you want to claim
+    /// Individual file or directory of files to be claimed
     #[clap(short, long)]
     path: String,
 
     /// todo
     #[clap(short, long)]
-    branch_name: Option<String>
-}
-
-impl CLICommand for Claim {
-    fn exec(&self) {
-
-        let result = LFS::lock(self.path.as_str());
-        match result {
-            Ok(out) => println!("{:?}", String::from_utf8(out.stdout)),
-            Err(err) => {}
-        }
-        // println!("the path is {:?}", self.path);
-        //
-        // let _output = LFS::cmd("push");//format!("lock {path}"));
-        //
-        // match _output {
-        //     Ok(out) => println!("{:?}", String::from_utf8(out.stdout)),
-        //     Err(e) => println!("error")
-        // }
-    }
+    branch_name: Option<String>,
 }
 
 /// todo
 #[derive(Args, Debug)]
-pub struct Config {
-
-}
-
-impl CLICommand for Config {
-    fn exec(&self) {
-        show_config();
-    }
-}
+pub struct Config {}
 
 /// todo
 #[derive(Args, Debug)]
@@ -65,18 +42,7 @@ pub struct Return {
 
     /// Return all currently claimed files
     #[clap(short, long)]
-    all: Option<bool>
-}
-
-impl CLICommand for Return {
-    fn exec(&self) {
-
-        let result = LFS::unlock(self.path.as_str(), false);
-        match result {
-            Ok(out) => println!("{:?}", String::from_utf8(out.stdout)),
-            Err(err) => {}
-        }
-    }
+    all: Option<bool>,
 }
 
 /// todo
@@ -92,40 +58,17 @@ pub struct Save {
 
     /// todo
     #[clap(short, long)]
-    message: String
-}
-
-impl CLICommand for Save {
-    fn exec(&self) {
-
-        // if not in claim branch, make claim branch
-
-        // commit work
-
-        // push changes
-    }
+    message: String,
 }
 
 /// todo
 #[derive(Args, Debug)]
-pub struct Checkout {
-
-}
-
-impl CLICommand for Checkout {
-    fn exec(&self) {
-        todo!();
-    }
-}
+pub struct Checkout {}
 
 /// todo
 #[derive(Args, Debug)]
-pub struct Commit {
+pub struct Commit {}
 
-}
-
-impl CLICommand for Commit {
-    fn exec(&self) {
-        todo!();
-    }
-}
+/// Output the status of locker
+#[derive(Args, Debug)]
+pub struct Status {}

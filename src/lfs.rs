@@ -3,7 +3,7 @@ use std::process::{Command, Output};
 
 pub struct LFS;
 
-fn sh_cmd(cmd:String) -> io::Result<Output> {
+fn sh_cmd(cmd: String) -> io::Result<Output> {
     return Command::new("sh")
         .arg("-c")
         .arg(cmd)
@@ -12,8 +12,8 @@ fn sh_cmd(cmd:String) -> io::Result<Output> {
 
 impl LFS {
     /// todo
-    fn cmd(cmd:String) -> io::Result<Output> {
-        return sh_cmd(format!("git lfs {cmd}"))
+    fn cmd(cmd: String) -> io::Result<Output> {
+        return sh_cmd(format!("git lfs {cmd}"));
     }
 
     /// todo
@@ -21,23 +21,28 @@ impl LFS {
         return LFS::cmd(String::from("install"));
     }
 
-    pub fn track_type(file_ext:&str) -> io::Result<Output> {
+    /// todo
+    pub fn track_type(file_ext: &str) -> io::Result<Output> {
         return LFS::cmd(format!("track \"*.{file_ext}\" --lockable"));
     }
 
-    pub fn track_file(path:&str) -> io::Result<Output> {
+    /// todo
+    pub fn track_file(path: &str) -> io::Result<Output> {
         return LFS::cmd(format!("track --filename \"{path}\" --lockable"));
     }
 
-    pub fn lock(path:&str) -> io::Result<Output> {
+    /// todo
+    pub fn lock(path: &str) -> io::Result<Output> {
         return LFS::cmd(format!("lock \"{path}\""));
     }
 
-    pub fn unlock(path:&str, force:bool) -> io::Result<Output> {
+    /// todo
+    pub fn unlock(path: &str, force: bool) -> io::Result<Output> {
         return LFS::cmd(format!("unlock \"{path}\""));
     }
 
-    pub fn locked_files(path:&str) -> io::Result<Output> {
+    /// todo
+    pub fn locked_files(path: &str) -> io::Result<Output> {
         return LFS::cmd(format!("lock \"{path}\""));
     }
 

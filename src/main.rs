@@ -10,23 +10,23 @@ mod commands;
 struct LockerInterface {
     /// Path to the directory of the git repo if not run from it
     #[clap(short, long)]
-    directory:Option<String>,
+    directory: Option<String>,
 
     /// The command to run
     #[clap(subcommand)]
     command: LockerCommand,
 }
-
+/// todo - should this ignore "branches" and use a "workspace" concept?
 /// todo - change branch command for switching which branch a claim is linked to,
 /// todo - separate Add command or just also use Claim?
-trait_enum!{
+trait_enum! {
     /// todo
     #[derive(Subcommand, Debug)]
     pub enum LockerCommand: CLICommand {
         /// todo
         Config,
 
-        /// Claim ownership over a directory or file so that it can be worked on
+        /// Claim ownership over a directory or file so that it may be worked on
         Claim,
 
         /// Return a directory or file so it may be claimed by other users
@@ -34,6 +34,9 @@ trait_enum!{
 
         /// Commit your work to a claim branch
         Save,
+
+        /// Output the current status of locker
+        Status,
     }
 }
 
@@ -50,9 +53,6 @@ pub struct LockerConfig {
 
     /// Do returned files require a review step before merging into return_branch?
     require_review: bool,
-
-    // Will claiming a file
-    auto_branch: bool
 }
 
 fn main() {

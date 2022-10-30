@@ -1,3 +1,6 @@
+use crate::commands::{ Config, CLICommand };
+use crate::lfs::*;
+
 use tui::{
     backend::CrosstermBackend,
     widgets::{Widget, Block, Borders},
@@ -5,6 +8,7 @@ use tui::{
     Terminal,
     Frame,
 };
+
 use crossterm::{
     event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode},
     execute,
@@ -18,6 +22,13 @@ use tui::layout::Alignment;
 use tui::style::{Color, Modifier, Style};
 use tui::text::Span;
 use tui::widgets::BorderType;
+
+
+impl CLICommand for Config {
+    fn exec(&self) {
+        show_config();
+    }
+}
 
 pub fn show_config() -> Result<(), Box<dyn Error>> {
     let mut stdout = io::stdout();
