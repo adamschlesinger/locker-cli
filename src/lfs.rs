@@ -1,60 +1,45 @@
 use std::io;
-use std::process::{Command, Output};
+use crate::sh;
+use crate::shell::{ShellResult};
 
-pub struct LFS;
-
-fn sh_cmd(cmd: String) -> io::Result<Output> {
-    return Command::new("sh")
-        .arg("-c")
-        .arg(cmd)
-        .output();
+/// todo
+pub fn install() -> ShellResult {
+    return sh!("git lfs install");
 }
 
-impl LFS {
-    /// todo
-    fn cmd(cmd: String) -> io::Result<Output> {
-        return sh_cmd(format!("git lfs {cmd}"));
-    }
+/// todo
+pub fn track_type(file_ext: &str) -> ShellResult {
+    return sh!("git lfs track \"*.{file_ext}\" --lockable");
+}
 
-    /// todo
-    pub fn install() -> io::Result<Output> {
-        return LFS::cmd(String::from("install"));
-    }
+/// todo
+pub fn track_file(path: &str) -> ShellResult {
+    return sh!("git lfs track --filename \"{path}\" --lockable");
+}
 
-    /// todo
-    pub fn track_type(file_ext: &str) -> io::Result<Output> {
-        return LFS::cmd(format!("track \"*.{file_ext}\" --lockable"));
-    }
+/// todo
+pub fn lock(path: &str) -> ShellResult {
+    return sh!("git lfs lock \"{path}\"");
+}
 
-    /// todo
-    pub fn track_file(path: &str) -> io::Result<Output> {
-        return LFS::cmd(format!("track --filename \"{path}\" --lockable"));
-    }
+/// todo
+pub fn unlock(path: &str, force: bool) -> ShellResult {
+    return sh!("git lfs unlock \"{path}\"");
+}
 
-    /// todo
-    pub fn lock(path: &str) -> io::Result<Output> {
-        return LFS::cmd(format!("lock \"{path}\""));
-    }
+/// todo
+pub fn locked_files(path: &str) -> ShellResult {
+    return sh!("git lfs lock \"{path}\"");
+}
 
-    /// todo
-    pub fn unlock(path: &str, force: bool) -> io::Result<Output> {
-        return LFS::cmd(format!("unlock \"{path}\""));
-    }
+/// todo
+pub fn check_installed() -> io::Result<bool> {
+    // let stdout = LFS::cmd("env")?.stdout;
+    // let env_string = String::from_utf8(stdout)?;
 
-    /// todo
-    pub fn locked_files(path: &str) -> io::Result<Output> {
-        return LFS::cmd(format!("lock \"{path}\""));
-    }
+    // todo - how to do this?
+    let installed = true;
 
-    /// todo
-    pub fn check_installed() -> io::Result<bool> {
-        // let stdout = LFS::cmd("env")?.stdout;
-        // let env_string = String::from_utf8(stdout)?;
-
-        // todo - how to do this?
-        let installed = true;
-
-        println!("LFS installation status: {}", installed);
-        return Ok(installed);
-    }
+    println!("LFS installation status: {installed}");
+    return Ok(installed);
 }

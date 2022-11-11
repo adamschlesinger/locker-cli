@@ -1,24 +1,36 @@
-use clap::{ArgMatches, Args, Error, FromArgMatches, Parser, Subcommand};
+use clap::{Parser, Subcommand};
 use trait_enum::*;
 use crate::commands::*;
 
 mod lfs;
 mod commands;
+mod git;
+mod shell;
+
+const LOCKER_PATH:&str = ".git/locker";
 
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about = None)]
 struct LockerInterface {
-    /// Path to the directory of the git repo if not run from it
+    /// NYI Path to the directory of the git repo if not run from it
     #[clap(short, long)]
     directory: Option<String>,
+
+    /// NYI Log all messages
+    #[clap(short, long)]
+    verbose: bool,
+
+    /// NYI todo
+    #[clap(short, long)]
+    force: bool,
 
     /// The command to run
     #[clap(subcommand)]
     command: LockerCommand,
 }
-/// todo - should this ignore "branches" and use a "workspace" concept?
-/// todo - change branch command for switching which branch a claim is linked to,
-/// todo - separate Add command or just also use Claim?
+// todo - should this ignore "branches" and use a "workspace" concept?
+// todo - change branch command for switching which branch a claim is linked to,
+// todo - separate Add command or just also use Claim?
 trait_enum! {
     /// todo
     #[derive(Subcommand, Debug)]
@@ -40,6 +52,10 @@ trait_enum! {
     }
 }
 
+// pub enum qwe {
+//     asd(checkout)
+// }
+
 // todo - separate LockerCommand enum for different config?
 
 // #[derive(Debug, Serialize, Deserialize)]
@@ -60,6 +76,15 @@ fn main() {
     // println!("{:#?}", cfg);
 
     let cli = LockerInterface::parse();
+
+    println!("test");
+    let repo_path = match cli.directory {
+        Some(path) => path,
+        None => git::repo_absolute_path()
+    };
+
+    println!("repo path is {repo_path}");
+
     let deref: &dyn CLICommand = cli.command.deref();
     deref.exec();
 }

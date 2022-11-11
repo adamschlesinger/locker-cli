@@ -25,3 +25,8 @@ With `workflow` set to `none` Locker will
 # TODO
 - setup hooks for returning a file
   - should the lock be transferred to an admin?
+
+# Dependencies
+- Git LFS
+- sed
+- git

@@ -3,6 +3,6 @@ use crate::lfs::*;
 
 impl CLICommand for Status {
     fn exec(&self) {
-        println!("the status!");
+        println!("todo - the status!");
     }
 }
