@@ -10,29 +10,29 @@ mod shell;
 const LOCKER_PATH:&str = ".git/locker";
 
 #[derive(Parser, Debug)]
-#[clap(author, version, about, long_about = None)]
+#[command(author, version, about, long_about = None)]
 struct LockerInterface {
     /// NYI Path to the directory of the git repo if not run from it
-    #[clap(short, long)]
+    #[arg(short, long)]
     directory: Option<String>,
 
     /// NYI Log all messages
-    #[clap(short, long)]
+    #[arg(short, long)]
     verbose: bool,
 
     /// NYI todo
-    #[clap(short, long)]
+    #[arg(short, long)]
     force: bool,
 
     /// The command to run
-    #[clap(subcommand)]
+    #[command(subcommand)]
     command: LockerCommand,
 }
 // todo - should this ignore "branches" and use a "workspace" concept?
 // todo - change branch command for switching which branch a claim is linked to,
 // todo - separate Add command or just also use Claim?
 trait_enum! {
-    /// todo
+    /// Commands available to the locker cli
     #[derive(Subcommand, Debug)]
     pub enum LockerCommand: CLICommand {
         /// todo
@@ -51,10 +51,6 @@ trait_enum! {
         Status,
     }
 }
-
-// pub enum qwe {
-//     asd(checkout)
-// }
 
 // todo - separate LockerCommand enum for different config?
 
@@ -87,4 +83,5 @@ fn main() {
 
     let deref: &dyn CLICommand = cli.command.deref();
     deref.exec();
+
 }

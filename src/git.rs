@@ -14,7 +14,7 @@ pub fn repo_absolute_path() -> String {
     return match sh!("git rev-parse --show-toplevel") {
         Ok(path) => path,
         Err(_) => { // todo - this doesn't seem to actually fail?
-            panic!("todo - error about the path being wrong!");
+            todo!("error about the path being wrong!");
         }
     }
 }

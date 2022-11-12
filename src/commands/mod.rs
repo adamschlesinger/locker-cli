@@ -8,8 +8,7 @@ mod r#return;
 mod commit;
 mod status;
 
-use clap::{Args, Command, Subcommand, Parser};
-use crate::lfs::*;
+use clap::Args;
 
 /// Common trait for all subcommands
 pub trait CLICommand {
@@ -23,7 +22,7 @@ pub struct Claim {
     path: String,
 
     /// NYI If specified then create a new branch when claiming
-    #[clap(short, long)]
+    #[arg(short, long)]
     branch_name: Option<String>,
 }
 
@@ -36,7 +35,7 @@ pub struct Config {}
 pub struct Return {
     /// The file or directory with multiple claimable files to be returned. If not specified
     /// then all currently locked files of the current branch will be returned.
-    #[clap(short, long)]
+    #[arg(short, long)]
     path: Option<String>,
 }
 
@@ -47,11 +46,11 @@ pub struct Save {
     path: Option<String>,
 
     /// Save all currently claimed files
-    #[clap(short, long)]
+    #[arg(short, long)]
     all: bool,
 
     /// NYI Commit message to specify changes made. Default is TODO
-    #[clap(short, long)]
+    #[arg(short, long)]
     message: Option<String>,
 }
 
