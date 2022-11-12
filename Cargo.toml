@@ -1,5 +1,5 @@
 [package]
-name = "locker-cli"
+name = "locker"
 description = "Asset management in Git for humans"
 version = "0.1.0"
 edition = "2021"

@@ -1,9 +1,10 @@
-# locker-cli
+# locker
 Asset management in Git for humans
 
 ## Installation
 ### Brew
 ```shell
+brew update
 brew install locker
 ```
 
