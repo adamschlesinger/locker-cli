@@ -7,10 +7,10 @@ pub type ShellResult = core::result::Result<String, ShellError>;
 pub struct ShellError {}
 
 /// Executes the cmd and returns when done
-pub fn cmd(arg: String) -> Result<String, ShellError> {
+pub fn sh(cmd: String) -> ShellResult {
     let cmd_result = Command::new("sh")
         .arg("-c")
-        .arg(arg)
+        .arg(cmd)
         .output();
 
     let str_result = match cmd_result {
@@ -30,21 +30,20 @@ fn cmd_handle() {
     // todo
 }
 
-/// Helper for running shell commands
+/// Helper for running shell commands with formatting
 #[macro_export]
 macro_rules! sh {
     ($arg:expr) => {
-        $crate::shell::cmd(format!($arg))
+        $crate::shell::sh(format!($arg))
     }
 }
 
-// todo - this
-macro_rules! build_cmd {
+// Build simple methods to contain a shell command
+#[macro_export]
+macro_rules! sh_fn {
     ($funcname:tt, $command:tt, $($varname:tt: $typename:ty),*) => {
-        pub fn $funcname($($varname: $typename),*) -> io::Result<Output> {
-            return cmd(format!($command));
+        pub fn $funcname($($varname: $typename),*) -> ShellResult {
+            return sh!($command);
         }
     };
 }
-
-// build_fn!(qwe, "todo {path}", path: &str, force: bool);
