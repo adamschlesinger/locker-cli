@@ -1,25 +1,20 @@
 use crate::commands::{Return, CLICommand};
 use crate::lfs;
 
-struct QWE {
-    path: Option<String>,
-}
-
-impl CLICommand for QWE {
-    fn exec(&self) {}
-}
-
 impl CLICommand for Return {
     fn exec(&self) {
 
-        // match self.path {
-        //     None => {}
-        //     Some(qwe) => {}
-        // }
+        match &self.path {
+            Some(path) => {}
+            None => {
+                // get all locks for the workspace/branch
+                let locks = ["", ""];
 
-        // if let Some(qwe) = self.path {
-        //
-        // }
+                for lock in locks {
+                    
+                }
+            }
+        }
 
         // match lfs::unlock(self.path.as_str(), false) {
         //     Ok(out) => println!("{:?}", String::from_utf8(out.stdout)),

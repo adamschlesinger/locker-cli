@@ -22,6 +22,15 @@ Controlled workflow mode will use the built-in strategy for managing branches, c
 ##### No Workflow
 With `workflow` set to `none` Locker will 
 
+#### Recommended Repo Settings
+##### Github
+todo - branch protection stuff
+
+##### Gitlab
+todo
+
+##### OTHER
+todo
 
 # TODO
 - setup hooks for returning a file

@@ -1,14 +1,19 @@
-use clap::{Parser, Subcommand};
-use trait_enum::*;
 use crate::commands::*;
+use clap::{Parser, Subcommand};
+use log::{info, trace, warn, LevelFilter};
+use std::fmt::format;
+use std::path::Path;
+use trait_enum::*;
 
-mod lfs;
 mod commands;
 mod git;
+mod lfs;
 mod shell;
 
-const LOCKER_PATH:&str = ".git/locker";
+/// Path to locker's settings for the specified repod
+const LOCKER_PATH: &str = ".git/locker";
 
+/// Default CLI
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 struct LockerInterface {
@@ -20,7 +25,24 @@ struct LockerInterface {
     #[arg(short, long)]
     verbose: bool,
 
-    /// NYI todo
+    /// The command to run
+    #[command(subcommand)]
+    command: LockerCommand,
+}
+
+/// CLI if the detected user is an admin
+#[derive(Parser, Debug)]
+#[command(author, version, about, long_about = None)]
+struct LockerInterfaceAdmin {
+    /// NYI Path to the directory of the git repo if not run from it
+    #[arg(short, long)]
+    directory: Option<String>,
+
+    /// NYI Log all messages
+    #[arg(short, long)]
+    verbose: bool,
+
+    /// NYI Force any command to resolve with expected behavior
     #[arg(short, long)]
     force: bool,
 
@@ -28,6 +50,7 @@ struct LockerInterface {
     #[command(subcommand)]
     command: LockerCommand,
 }
+
 // todo - should this ignore "branches" and use a "workspace" concept?
 // todo - change branch command for switching which branch a claim is linked to,
 // todo - separate Add command or just also use Claim?
@@ -68,20 +91,31 @@ pub struct LockerConfig {
 }
 
 fn main() {
-    // let cfg: LockerConfig = confy::load("lockerConfig")?;
-    // println!("{:#?}", cfg);
+    log::set_max_level(LevelFilter::Info);
+
+    println!("Starting locker");
 
     let cli = LockerInterface::parse();
 
-    println!("test");
     let repo_path = match cli.directory {
         Some(path) => path,
-        None => git::repo_absolute_path()
+        None => git::repo_absolute_path(),
     };
 
-    println!("repo path is {repo_path}");
+    println!("Absolute path to repo is {repo_path}");
+
+    let config_path = format!("{repo_path}/{LOCKER_PATH}");
+    println!("Loading configuration at {config_path}");
+
+    let config_path = Path::new(config_path.as_str());
+
+    if !config_path.exists() {
+        warn!("Could not find configuration");
+    }
+
+    // let cfg: LockerConfig = confy::load("lockerConfig")?;
+    // println!("{:#?}", cfg);
 
     let deref: &dyn CLICommand = cli.command.deref();
     deref.exec();
-
 }

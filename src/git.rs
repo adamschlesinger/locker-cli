@@ -1,5 +1,5 @@
 use crate::sh;
-use crate::shell::{ShellResult};
+use crate::shell::ShellResult;
 
 /// Name of the default branch
 /// todo git rev-parse --abbrev-ref origin/HEAD
@@ -12,9 +12,10 @@ pub fn origin_default() -> ShellResult {
 /// Fully qualified path to the base folder of the repo
 pub fn repo_absolute_path() -> String {
     return match sh!("git rev-parse --show-toplevel") {
-        Ok(path) => path,
-        Err(_) => { // todo - this doesn't seem to actually fail?
+        Ok(path) => path.trim().to_string(),
+        Err(_) => {
+            // todo - this doesn't seem to actually fail?
             todo!("error about the path being wrong!");
         }
-    }
+    };
 }
