@@ -1,13 +1,14 @@
 use crate::commands::*;
+use crate::logger::LogLevel;
 use clap::{Parser, Subcommand};
-use log::{info, trace, warn, LevelFilter};
-use std::fmt::format;
 use std::path::Path;
 use trait_enum::*;
+use serde::{Serialize, Deserialize};
 
 mod commands;
 mod git;
 mod lfs;
+mod logger;
 mod shell;
 
 /// Path to locker's settings for the specified repod
@@ -77,7 +78,7 @@ trait_enum! {
 
 // todo - separate LockerCommand enum for different config?
 
-// #[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct LockerConfig {
     /// todo
     return_branch: String,
@@ -91,30 +92,29 @@ pub struct LockerConfig {
 }
 
 fn main() {
-    log::set_max_level(LevelFilter::Info);
-
-    println!("Starting locker");
-
     let cli = LockerInterface::parse();
 
-    let repo_path = match cli.directory {
-        Some(path) => path,
-        None => git::repo_absolute_path(),
-    };
+    println!("🔐 starting...");
+    logger::init(if cli.verbose == true {
+        LogLevel::Debug
+    } else {
+        LogLevel::Error
+    });
 
-    println!("Absolute path to repo is {repo_path}");
+    let repo_path = git::repo_absolute_path(cli.directory);
+    debug!("Absolute path to repo is {repo_path}");
 
     let config_path = format!("{repo_path}/{LOCKER_PATH}");
-    println!("Loading configuration at {config_path}");
+    debug!("Loading configuration at {config_path}");
 
     let config_path = Path::new(config_path.as_str());
 
     if !config_path.exists() {
         warn!("Could not find configuration");
-    }
 
-    // let cfg: LockerConfig = confy::load("lockerConfig")?;
-    // println!("{:#?}", cfg);
+        // let's just make one for now
+
+    }
 
     let deref: &dyn CLICommand = cli.command.deref();
     deref.exec();
