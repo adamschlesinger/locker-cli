@@ -1,3 +1,6 @@
+use std::fs;
+use std::fs::File;
+use std::io::Write;
 use crate::commands::*;
 use crate::logger::LogLevel;
 use clap::{Parser, Subcommand};
@@ -91,7 +94,17 @@ pub struct LockerConfig {
     require_review: bool,
 }
 
-fn main() {
+impl Default for LockerConfig {
+    fn default() -> Self {
+        return LockerConfig {
+            return_branch: git::origin_default(),
+            claim_branch_pattern: None,
+            require_review: false
+        }
+    }
+}
+
+fn main() -> std::io::Result<()> {
     let cli = LockerInterface::parse();
 
     println!("🔐 starting...");
@@ -104,18 +117,29 @@ fn main() {
     let repo_path = git::repo_absolute_path(cli.directory);
     debug!("Absolute path to repo is {repo_path}");
 
-    let config_path = format!("{repo_path}/{LOCKER_PATH}");
+    let locker_path = format!("{repo_path}/{LOCKER_PATH}");
+    let config_path = format!("{locker_path}/config");
     debug!("Loading configuration at {config_path}");
 
-    let config_path = Path::new(config_path.as_str());
+    let locker_path = Path::new(&locker_path);
+    let config_path = Path::new(&config_path);
+
+    if !locker_path.exists() {
+        debug!("Creating new path for configuration files");
+        fs::create_dir_all(locker_path)?;
+    }
 
     if !config_path.exists() {
-        warn!("Could not find configuration");
+        debug!("Creating new config file");
+        let cfg_str = toml::to_string(&LockerConfig::default())
+            .unwrap();
 
-        // let's just make one for now
-
+        let mut file = File::create(config_path)?;
+        file.write_all(cfg_str.as_bytes())?;
     }
 
     let deref: &dyn CLICommand = cli.command.deref();
     deref.exec();
+
+    Ok(())
 }
