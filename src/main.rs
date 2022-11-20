@@ -1,12 +1,12 @@
-use std::fs;
-use std::fs::File;
-use std::io::Write;
 use crate::commands::*;
 use crate::logger::LogLevel;
 use clap::{Parser, Subcommand};
+use serde::{Deserialize, Serialize};
+use std::fs;
+use std::fs::File;
+use std::io::Write;
 use std::path::Path;
 use trait_enum::*;
-use serde::{Serialize, Deserialize};
 
 mod commands;
 mod git;
@@ -14,8 +14,9 @@ mod lfs;
 mod logger;
 mod shell;
 
-/// Path to locker's settings for the specified repod
-const LOCKER_PATH: &str = ".git/locker";
+/// Path of locker's configs and workspace information
+const LOCKER_PATH: &str = ".locker";
+const WORKSPACES_PATH: &str = ".locker/workspaces";
 
 /// Default CLI
 #[derive(Parser, Debug)]
@@ -65,13 +66,14 @@ trait_enum! {
         /// todo
         Config,
 
-        /// Claim ownership over a directory or file so that it may be worked on
+        /// Claim ownership over a directory or file so that it may be worked on in the current
+        /// or specified workspace
         Claim,
 
-        /// Return a directory or file so it may be claimed by other users
-        Return,
+        /// Release an unchanged directory, file, or whole workspace so it may be claimed by other workspaces
+        Release,
 
-        /// Commit your work to a claim branch
+        /// Backs up changes to the remote repository
         Save,
 
         /// Output the current status of locker
@@ -81,6 +83,7 @@ trait_enum! {
 
 // todo - separate LockerCommand enum for different config?
 
+/// Primary config for this repo's locker
 #[derive(Debug, Serialize, Deserialize)]
 pub struct LockerConfig {
     /// todo
@@ -94,12 +97,21 @@ pub struct LockerConfig {
     require_review: bool,
 }
 
+/// todo
+#[derive(Debug, Serialize, Deserialize)]
+pub struct WorkspaceConfig {}
+
+/// Local file describing the created workspaces. Removed
+/// when the workspace is submitted for review.
+#[derive(Debug, Serialize, Deserialize)]
+pub struct LockerWorkspace {}
+
 impl Default for LockerConfig {
     fn default() -> Self {
-        return LockerConfig {
+        LockerConfig {
             return_branch: git::origin_default(),
             claim_branch_pattern: None,
-            require_review: false
+            require_review: false,
         }
     }
 }
@@ -108,7 +120,7 @@ fn main() -> std::io::Result<()> {
     let cli = LockerInterface::parse();
 
     println!("🔐 starting...");
-    logger::init(if cli.verbose == true {
+    logger::init(if cli.verbose {
         LogLevel::Debug
     } else {
         LogLevel::Error
@@ -131,8 +143,7 @@ fn main() -> std::io::Result<()> {
 
     if !config_path.exists() {
         debug!("Creating new config file");
-        let cfg_str = toml::to_string(&LockerConfig::default())
-            .unwrap();
+        let cfg_str = toml::to_string(&LockerConfig::default()).unwrap();
 
         let mut file = File::create(config_path)?;
         file.write_all(cfg_str.as_bytes())?;

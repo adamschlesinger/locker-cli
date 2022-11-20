@@ -1,18 +1,15 @@
-use crate::commands::{Return, CLICommand};
+use crate::commands::{CLICommand, Release};
 use crate::lfs;
 
-impl CLICommand for Return {
+impl CLICommand for Release {
     fn exec(&self) {
-
         match &self.path {
             Some(path) => {}
             None => {
                 // get all locks for the workspace/branch
                 let locks = ["", ""];
 
-                for lock in locks {
-                    
-                }
+                for lock in locks {}
             }
         }
 
