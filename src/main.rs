@@ -1,3 +1,5 @@
+extern crate core;
+
 use crate::commands::*;
 use crate::logger::LogLevel;
 use clap::{Parser, Subcommand};
@@ -101,10 +103,18 @@ pub struct LockerConfig {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct WorkspaceConfig {}
 
+// todo - should workspace info be local only or remote?
+// What do we gain by it being remote?
+// - Ability to see the status of other workspaces.
+// - Can we do it in a hidden way with some weird ass lfs commands?
+
 /// Local file describing the created workspaces. Removed
 /// when the workspace is submitted for review.
 #[derive(Debug, Serialize, Deserialize)]
-pub struct LockerWorkspace {}
+pub struct LockerWorkspace {
+    /// The paths currently claimed to this workspace
+    locked_paths: Vec<String>,
+}
 
 impl Default for LockerConfig {
     fn default() -> Self {
@@ -119,12 +129,14 @@ impl Default for LockerConfig {
 fn main() -> std::io::Result<()> {
     let cli = LockerInterface::parse();
 
-    println!("🔐 starting...");
+    // setup logging
     logger::init(if cli.verbose {
         LogLevel::Debug
     } else {
-        LogLevel::Error
+        LogLevel::Info
     });
+
+    header!("Starting Locker 🔐");
 
     let repo_path = git::repo_absolute_path(cli.directory);
     debug!("Absolute path to repo is {repo_path}");
@@ -149,6 +161,7 @@ fn main() -> std::io::Result<()> {
         file.write_all(cfg_str.as_bytes())?;
     }
 
+    // run the command
     let deref: &dyn CLICommand = cli.command.deref();
     deref.exec();
 

@@ -1,35 +1,35 @@
-use std::io;
 use crate::sh;
 use crate::shell::Result;
+use std::io;
 
 /// todo
 pub fn install() -> Result {
-    return sh!("git lfs install");
+    sh!("git lfs install")
 }
 
 /// todo
 pub fn track_type(file_ext: &str) -> Result {
-    return sh!("git lfs track \"*.{file_ext}\" --lockable");
+    sh!("git lfs track \"*.{file_ext}\" --lockable")
 }
 
 /// todo
 pub fn track_file(path: &str) -> Result {
-    return sh!("git lfs track --filename \"{path}\" --lockable");
+    sh!("git lfs track --filename \"{path}\" --lockable")
 }
 
 /// todo
 pub fn lock(path: &str) -> Result {
-    return sh!("git lfs lock \"{path}\"");
+    sh!("git lfs lock \"{path}\"")
 }
 
 /// todo
 pub fn unlock(path: &str, force: bool) -> Result {
-    return sh!("git lfs unlock \"{path}\"");
+    sh!("git lfs unlock \"{path}\"")
 }
 
 /// todo
-pub fn locked_files(path: &str) -> Result {
-    return sh!("git lfs lock \"{path}\"");
+pub fn locked_files() -> Result {
+    sh!("git lfs locks")
 }
 
 /// todo

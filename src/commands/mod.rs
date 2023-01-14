@@ -18,10 +18,11 @@ pub trait CLICommand {
 /// todo
 #[derive(Args, Debug)]
 pub struct Claim {
-    /// File or directory to be claimed to the current or specified workspace
+    /// File or directory to be claimed to the current or specified workspace.
     path: String,
 
-    /// The workspace to claim the specified files to.
+    /// Switch to the named workspace before processing claim. If no workspace of specified name
+    /// exists then it will be created first.
     #[arg(short, long)]
     workspace: Option<String>,
 }
