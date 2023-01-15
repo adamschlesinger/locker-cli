@@ -79,7 +79,7 @@ trait_enum! {
         Save,
 
         /// Output the current status of locker
-        Status,
+        Status
     }
 }
 
@@ -154,6 +154,22 @@ fn main() -> std::io::Result<()> {
     }
 
     if !config_path.exists() {
+        question!("Could not find a configuration for Locker. Would you like to set one up?" {
+            "y" => {},
+            "n" => {
+                info!("Exiting...");
+                return Ok(());
+            }
+        });
+
+        let branch = question!("Specify branch for returned files.", git::origin_default());
+
+        let config = LockerConfig {
+            return_branch: branch,
+            claim_branch_pattern: None,
+            require_review: false,
+        };
+
         debug!("Creating new config file");
         let cfg_str = toml::to_string(&LockerConfig::default()).unwrap();
 

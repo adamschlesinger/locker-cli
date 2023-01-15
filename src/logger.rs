@@ -13,7 +13,7 @@ macro_rules! header {
 #[macro_export]
 macro_rules! debug {
     ($($arg:tt)*) => {{
-        crate::logger::__log(crate::logger::LogLevel::Debug, format!($($arg)*))
+        crate::logger::__debug(format!($($arg)*))
     }};
 }
 
@@ -72,13 +72,21 @@ pub fn __log(level: LogLevel, msg: String) {
     }
 }
 
-/// todo
 #[doc(hidden)]
 pub fn __header(msg: String) {
     let _ = execute!(
         stdout(),
         SetForegroundColor(Color::Green),
         Print(format!("\n {msg}\n")),
+    );
+}
+
+#[doc(hidden)]
+pub fn __debug(msg: String) {
+    let _ = execute!(
+        stdout(),
+        SetForegroundColor(Color::Grey),
+        Print(format!("  {msg}\n")),
     );
 }
 
