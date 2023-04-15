@@ -1,9 +1,9 @@
-use crate::commands::{ Commit, CLICommand };
+use crate::commands::{CLICommand, Commit};
 use crate::lfs::*;
-
+use crate::RunSettings;
 
 impl CLICommand for Commit {
-    fn exec(&self) {
+    fn exec(&self, settings: RunSettings) {
         todo!();
     }
 }

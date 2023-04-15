@@ -1,8 +1,8 @@
 use crate::commands::{CLICommand, Status};
-use crate::{header, info, lfs};
+use crate::{header, info, lfs, RunSettings};
 
 impl CLICommand for Status {
-    fn exec(&self) {
+    fn exec(&self, settings: RunSettings) {
         let lfs_locks = lfs::locked_files();
 
         // current workspace info
@@ -13,7 +13,7 @@ impl CLICommand for Status {
         info!("todo");
 
         header!("All Locks");
-        info!("todo");
+        info!("{:?}", lfs_locks.unwrap());
 
         header!("Local Workspaces");
         info!("todo");

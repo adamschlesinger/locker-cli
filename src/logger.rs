@@ -6,35 +6,35 @@ use std::io::stdout;
 #[macro_export]
 macro_rules! header {
     ($($arg:tt)*) => {{
-        crate::logger::__header(format!($($arg)*))
+        $crate::logger::__header(format!($($arg)*))
     }};
 }
 
 #[macro_export]
 macro_rules! debug {
     ($($arg:tt)*) => {{
-        crate::logger::__debug(format!($($arg)*))
+        $crate::logger::__log($crate::logger::LogLevel::Debug, format!($($arg)*))
     }};
 }
 
 #[macro_export]
 macro_rules! info {
     ($($arg:tt)*) => {{
-        crate::logger::__log(crate::logger::LogLevel::Info, format!($($arg)*))
+        $crate::logger::__log($crate::logger::LogLevel::Info, format!($($arg)*))
     }};
 }
 
 #[macro_export]
 macro_rules! warn {
     ($($arg:tt)*) => {
-        $crate::logger::__log(crate::logger::LogLevel::Warn, format!($($arg)*))
+        $crate::logger::__log($crate::logger::LogLevel::Warn, format!($($arg)*))
     };
 }
 
 #[macro_export]
 macro_rules! error {
     ($($arg:tt)*) => {
-        crate::logger::__log(crate::logger::LogLevel::Error, format!($($arg)*))
+        $crate::logger::__log($crate::logger::LogLevel::Error, format!($($arg)*))
     };
 }
 

@@ -1,9 +1,9 @@
-use crate::commands::{ Checkout, CLICommand };
+use crate::commands::{CLICommand, Checkout};
 use crate::lfs::*;
-
+use crate::RunSettings;
 
 impl CLICommand for Checkout {
-    fn exec(&self) {
+    fn exec(&self, settings: RunSettings) {
         todo!();
     }
 }

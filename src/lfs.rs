@@ -3,6 +3,11 @@ use crate::shell::Result;
 use std::io;
 
 /// todo
+pub fn version() -> Result {
+    sh!("git lfs -v")
+}
+
+/// todo
 pub fn install() -> Result {
     sh!("git lfs install")
 }
@@ -41,5 +46,5 @@ pub fn check_installed() -> io::Result<bool> {
     let installed = true;
 
     println!("LFS installation status: {installed}");
-    return Ok(installed);
+    Ok(installed)
 }

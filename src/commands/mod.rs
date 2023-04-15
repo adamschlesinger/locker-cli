@@ -3,16 +3,18 @@
 mod checkout;
 mod claim;
 mod commit;
-mod config;
-mod r#return;
+mod init;
+mod release;
 mod save;
 mod status;
 
+use crate::RunSettings;
 use clap::Args;
 
 /// Common trait for all subcommands
 pub trait CLICommand {
-    fn exec(&self);
+    /// todo
+    fn exec(&self, settings: RunSettings);
 }
 
 /// todo
@@ -29,7 +31,7 @@ pub struct Claim {
 
 /// todo
 #[derive(Args, Debug)]
-pub struct Config {}
+pub struct Init {}
 
 /// todo
 #[derive(Args, Debug)]

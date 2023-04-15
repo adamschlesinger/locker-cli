@@ -8,20 +8,32 @@ use std::process::Command;
 #[macro_export]
 macro_rules! sh {
     ($arg:expr) => {
-        $crate::shell::sh(format!($arg))
+        $crate::shell::__sh(format!($arg))
     };
 }
 
-/// Ask a question and get an answer
+/// Ask a question and get an answer.
 ///
+/// # Open ended:
+/// ``` rust
+/// let choice = question!("What is your name?");
+/// ```
+///
+/// # With a default:
+/// ``` rust
+/// let choice = question!(
+///     "What is the answer to life, the universe, and everything?",
+///     "42"
+/// );
+/// ```
+///
+/// # With defined options:
 /// ``` rust
 /// question!("Would you like to continue?" {
 ///     "y" => todo!(),
 ///     "n" => todo!()
 /// });
 /// ```
-/// Produces:
-/// "Would you like to continue? y/n"
 #[macro_export]
 macro_rules! question {
     ($msg:tt {
@@ -69,14 +81,6 @@ macro_rules! question {
     }};
 }
 
-// #[macro_export]
-// #[doc(hidden)]
-// macro_rules! __question_with_options {
-//     ($msg:tt [$({$opt:tt, $response:expr}),+]) => {
-//         // todo
-//     };
-// }
-
 /// Describes when a shell command has failed with a non-zero exit code
 #[derive(Debug)]
 pub struct Error {
@@ -91,7 +95,7 @@ pub struct Error {
 pub type Result = core::result::Result<String, Error>;
 
 #[doc(hidden)]
-pub fn sh(cmd: String) -> Result {
+pub fn __sh(cmd: String) -> Result {
     let cmd_result = Command::new("sh").arg("-c").arg(cmd).output();
 
     let cmd_output = cmd_result.unwrap();
