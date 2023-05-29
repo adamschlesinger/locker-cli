@@ -1,4 +1,5 @@
 use crate::commands::{CLICommand, Init};
+use crate::question::Question;
 use crate::*;
 use std::io::Write;
 use std::process::exit;
@@ -7,16 +8,13 @@ impl CLICommand for Init {
     fn exec(&self, settings: RunSettings) {
         header!("Starting Locker Initialization");
 
-        if !settings.locker_path.exists() {
-            debug!("Creating new path for configuration files");
-            let _ = fs::create_dir_all(settings.locker_path);
-        }
-
-        let branch = question!("Specify branch for returned files.", git::origin_default());
+        make_locker_path(&settings);
+        let release_branch = ask_release_branch();
+        lfs_check_and_install();
 
         let config = LockerConfig {
-            return_branch: branch,
-            claim_branch_pattern: None,
+            release_branch,
+            workspace_branch_pattern: None,
             require_review: false,
         };
 
@@ -30,15 +28,37 @@ impl CLICommand for Init {
             "y" => {},
             "n" => {}
         });
+    }
+}
 
-        if let Err(_) = lfs::version() {
-            question!("git lfs not found. Would you like to install it?" {
-                "y" => {}, // todo
-                "n" => {
-                    error!("Please install git lfs before using Locker");
-                    exit(exitcode::UNAVAILABLE);
-                }
-            });
-        }
+fn ask_release_branch() -> String {
+    question!(
+        "Specify branch for released files and workspaces.",
+        git::origin_default().as_str()
+    )
+}
+
+fn make_locker_path(settings: &RunSettings) {
+    if !settings.locker_path.exists() {
+        debug!("Creating new path for configuration files");
+        let _ = fs::create_dir_all(settings.locker_path);
+    }
+}
+
+fn lfs_check_and_install() {
+    // LFS vTODO is required, make sure it's installed
+    if let Ok(lfs_version) = lfs::version() {
+        debug!("LFS version {}", lfs_version);
+        // todo - check lfs version
+    } else {
+        question!("git lfs not found. Would you like to install it?" {
+            "y" => {
+                warn!("todo");
+            },
+            "n" => {
+                error!("Please install git lfs before using locker");
+                exit(exitcode::UNAVAILABLE);
+            },
+        });
     }
 }

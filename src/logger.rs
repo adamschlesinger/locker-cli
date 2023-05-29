@@ -1,3 +1,4 @@
+use clap::ValueEnum;
 use crossterm::execute;
 use crossterm::style::{Color, Print, SetForegroundColor};
 use once_cell::sync::OnceCell;
@@ -38,7 +39,7 @@ macro_rules! error {
     };
 }
 
-#[derive(Debug, PartialEq, PartialOrd)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
 pub enum LogLevel {
     Debug,
     Info,

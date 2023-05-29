@@ -1,6 +1,7 @@
 use crate::commands::{CLICommand, Claim};
-use crate::{error, header, info, lfs, RunSettings};
+use crate::{debug, error, header, info, lfs, RunSettings};
 use crossterm::style::{Color, Print, SetForegroundColor};
+use std::path::Path;
 use std::process;
 
 impl CLICommand for Claim {
@@ -16,7 +17,8 @@ impl CLICommand for Claim {
                 // switch to workspace
             }
             None => {
-                // are we in a workspace?
+                debug!("No workspace specified. Checking if one is currently active.");
+                // todo
 
                 // no - error
                 error!("Not in a workspace and none specified");
@@ -24,12 +26,17 @@ impl CLICommand for Claim {
             }
         };
 
-        let result = lfs::lock(self.path.as_str());
-        match result {
-            Ok(out) => {
-                info!("Claimed {:?}", self.path)
+        // does path exist?
+        if Path::new(&self.path).exists() {
+            let result = lfs::lock(self.path.as_str());
+            match result {
+                Ok(out) => {
+                    info!("Claimed {:?}", self.path)
+                }
+                Err(err) => todo!("an error"),
             }
-            Err(err) => todo!("an error"),
+        } else {
+            debug!("Checking if {} is a workspace", self.path);
         }
     }
 }

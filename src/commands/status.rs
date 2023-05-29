@@ -15,7 +15,11 @@ impl CLICommand for Status {
         header!("All Locks");
         info!("{:?}", lfs_locks.unwrap());
 
+        // necessary to separate this info?
         header!("Local Workspaces");
+        info!("todo");
+
+        header!("Remote Workspaces");
         info!("todo");
     }
 }

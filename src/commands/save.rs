@@ -6,7 +6,9 @@ impl CLICommand for Save {
     fn exec(&self, settings: RunSettings) {
         header!("Saving {:?}", self.path);
 
-        // check for changes to locked files
+        if self.all {
+            // check for changes to locked files
+        }
 
         // if not in claim branch, make claim branch
 

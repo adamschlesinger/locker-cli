@@ -10,9 +10,11 @@ use std::path::Path;
 use trait_enum::*;
 
 mod commands;
+mod defer;
 mod git;
 mod lfs;
 mod logger;
+mod question;
 mod shell;
 
 // todo - should this ignore "branches" and use a "workspace" concept?
@@ -43,14 +45,14 @@ trait_enum! {
 /// Primary config for this repo's locker
 #[derive(Debug, Serialize, Deserialize)]
 pub struct LockerConfig {
-    /// todo
-    return_branch: String,
+    /// When files or workspaces are released what branch are they merged in to?
+    release_branch: String,
 
     /// eg: claim/*, feature/*, etc. Supports options such as claim/{file_name}
     /// If not specified then users will be have to specify their own branch on Claim
-    claim_branch_pattern: Option<String>,
+    workspace_branch_pattern: Option<String>,
 
-    /// Do returned files require a review step before merging into return_branch?
+    /// Do returned files require a review step before merging into release_branch?
     require_review: bool,
 }
 
@@ -69,10 +71,11 @@ pub struct RunSettings<'a> {
     workspaces_path: &'a Path,
 }
 
-/// todo
+/// Local file describing the created workspaces. Removed
+/// when the workspace is submitted for review.
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Workspace {
-    /// todo
+    /// Name given to the workspace
     name: String,
 
     /// All paths currently owned by this workspace
@@ -83,14 +86,6 @@ pub struct Workspace {
 // What do we gain by it being remote?
 // - Ability to see the status of other workspaces.
 // - Can we do it in a hidden way with some weird ass lfs commands?
-
-/// Local file describing the created workspaces. Removed
-/// when the workspace is submitted for review.
-#[derive(Debug, Serialize, Deserialize)]
-pub struct LockerWorkspace {
-    /// The paths currently claimed to this workspace
-    locked_paths: Vec<String>,
-}
 
 const LOCKER_PATH: &str = ".locker";
 const CONFIG_PATH: &str = ".locker/config";
@@ -105,52 +100,27 @@ struct LockerInterface {
     directory: Option<String>,
 
     /// Log debug messages
-    #[arg(short, long)]
-    verbose: bool,
+    #[arg(short, long, value_enum, default_value_t = LogLevel::Info)]
+    log_level: LogLevel,
 
     /// Command to run
     #[command(subcommand)]
     command: LockerCommand,
 }
 
-/// CLI if the detected user is an admin
-#[derive(Parser, Debug)]
-#[command(author, version, about, long_about = None)]
-struct LockerInterfaceAdmin {
-    /// Path to the directory of the git repo if not run from it
-    #[arg(short, long)]
-    directory: Option<String>,
-
-    /// Log all messages
-    #[arg(short, long)]
-    verbose: bool,
-
-    /// The command to run
-    #[command(subcommand)]
-    command: LockerCommand,
-}
-
 fn main() -> std::io::Result<()> {
     let cli = LockerInterface::parse();
-
-    // setup logging
-    logger::init(if cli.verbose {
-        LogLevel::Debug
-    } else {
-        LogLevel::Info
-    });
+    logger::init(cli.log_level);
 
     header!("Starting Locker 🔐");
+    info!("Asset control in git for humans");
 
     debug!("Establishing paths");
     let repo_path = git::repo_absolute_path(cli.directory);
     let locker_path = format!("{repo_path}/{LOCKER_PATH}");
     let config_path = format!("{repo_path}/{CONFIG_PATH}");
     let workspaces_path = format!("{repo_path}/{WORKSPACES_PATH}");
-    debug!("Repo base path   {repo_path}");
-    debug!("Locker main path {locker_path}");
-    debug!("Config path      {config_path}");
-    debug!("Workspaces path  {workspaces_path}");
+    debug!("Locker main path => {locker_path}");
 
     debug!("Attempting to load configuration at {config_path}");
     let repo_path = Path::new(&repo_path);
@@ -158,10 +128,14 @@ fn main() -> std::io::Result<()> {
     let config_path = Path::new(&config_path);
     let workspaces_path = Path::new(&workspaces_path);
 
-    // if !locker_path.exists() || !config_path.exists() {
-    //     error!("Could not find configuration for Locker; please run `locker init`");
-    //     std::process::exit(exitcode::USAGE);
-    // }
+    let mut command = cli.command;
+
+    if !locker_path.exists() || !config_path.exists() {
+        question!("Could not find configuration for Locker; Would you like to initialize this repo?" {
+            "y" => command = LockerCommand::Init(commands::Init {}),
+            "n" => { std::process::exit(exitcode::USAGE);}
+        });
+    }
 
     debug!("Building run settings");
     let settings = RunSettings {
@@ -172,10 +146,8 @@ fn main() -> std::io::Result<()> {
     };
 
     // run the command
-    debug!("{:?}", cli.command);
-
-    let deref: &dyn CLICommand = cli.command.deref();
-    deref.exec(settings);
+    debug!("Running {:?}", command);
+    command.exec(settings);
 
     Ok(())
 }
