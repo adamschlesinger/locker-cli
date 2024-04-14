@@ -1,45 +1,49 @@
+use std::io::stdout;
+
 use clap::ValueEnum;
 use crossterm::execute;
 use crossterm::style::{Color, Print, SetForegroundColor};
 use once_cell::sync::OnceCell;
-use std::io::stdout;
+use serde::{Deserialize, Serialize};
+
+use crate::utils::*;
 
 #[macro_export]
 macro_rules! header {
     ($($arg:tt)*) => {{
-        $crate::logger::__header(format!($($arg)*))
+        $crate::terminal::logger::__header(format!($($arg)*))
     }};
 }
 
 #[macro_export]
 macro_rules! debug {
     ($($arg:tt)*) => {{
-        $crate::logger::__log($crate::logger::LogLevel::Debug, format!($($arg)*))
+        $crate::terminal::logger::__log($crate::logger::LogLevel::Debug, format!($($arg)*))
     }};
 }
 
 #[macro_export]
 macro_rules! info {
     ($($arg:tt)*) => {{
-        $crate::logger::__log($crate::logger::LogLevel::Info, format!($($arg)*))
+        $crate::terminal::logger::__log($crate::logger::LogLevel::Info, format!($($arg)*))
     }};
 }
 
 #[macro_export]
 macro_rules! warn {
     ($($arg:tt)*) => {
-        $crate::logger::__log($crate::logger::LogLevel::Warn, format!($($arg)*))
+        $crate::terminal::logger::__log($crate::logger::LogLevel::Warn, format!($($arg)*))
     };
 }
 
 #[macro_export]
 macro_rules! error {
     ($($arg:tt)*) => {
-        $crate::logger::__log($crate::logger::LogLevel::Error, format!($($arg)*))
+        $crate::terminal::logger::__log($crate::logger::LogLevel::Error, format!($($arg)*))
     };
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
+#[derive(Debug, Serialize, Deserialize, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
 pub enum LogLevel {
     Debug,
     Info,
@@ -65,8 +69,10 @@ pub fn __log(level: LogLevel, msg: String) {
             if level >= *logger_level {
                 let _ = execute!(
                     stdout(),
+                    SetForegroundColor(Color::White),
+                    Print(timestamp()),
                     SetForegroundColor(color(&level)),
-                    Print(format!(" {msg}\n"))
+                    Print(format!(" {msg}\n")),
                 );
             }
         }
@@ -77,8 +83,11 @@ pub fn __log(level: LogLevel, msg: String) {
 pub fn __header(msg: String) {
     let _ = execute!(
         stdout(),
+        Print('\n'),
+        SetForegroundColor(Color::White),
+        Print(timestamp()),
         SetForegroundColor(Color::Green),
-        Print(format!("\n {msg}\n")),
+        Print(format!(" {msg}\n")),
     );
 }
 
@@ -86,16 +95,14 @@ pub fn __header(msg: String) {
 pub fn __debug(msg: String) {
     let _ = execute!(
         stdout(),
+        SetForegroundColor(Color::White),
+        Print(timestamp()),
         SetForegroundColor(Color::Grey),
-        Print(format!("  {msg}\n")),
+        Print(format!(" {msg}\n")),
     );
 }
 
 static LOG_LEVEL: OnceCell<LogLevel> = OnceCell::new();
-
-// fn time() -> &str {
-//     ""
-// }
 
 fn token(level: &LogLevel) -> &str {
     match level {

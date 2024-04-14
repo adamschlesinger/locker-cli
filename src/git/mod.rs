@@ -1,6 +1,8 @@
 use crate::sh;
 use std::process;
 
+pub mod lfs;
+
 /// Name of the default branch
 /// https://stackoverflow.com/questions/28666357/git-how-to-get-default-branch
 pub fn origin_default() -> String {

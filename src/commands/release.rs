@@ -1,8 +1,8 @@
 use crate::commands::{CLICommand, Release};
-use crate::{lfs, RunSettings};
+use crate::RunSettings;
 
 impl CLICommand for Release {
-    fn exec(&self, settings: RunSettings) {
+    fn exec(&self, settings: &RunSettings) {
         match &self.path {
             Some(path) => {}
             None => {

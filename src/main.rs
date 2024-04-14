@@ -1,45 +1,47 @@
 extern crate core;
 
-use crate::commands::*;
-use crate::logger::LogLevel;
-use clap::{Parser, Subcommand};
-use serde::{Deserialize, Serialize};
 use std::fs;
 use std::fs::File;
 use std::path::Path;
-use trait_enum::*;
+
+use clap::{Parser, Subcommand};
+use enum_dispatch::enum_dispatch;
+use serde::{Deserialize, Serialize};
+
+use crate::commands::*;
+use crate::terminal::logger;
+use crate::terminal::logger::LogLevel;
+use crate::terminal::question;
 
 mod commands;
-mod defer;
 mod git;
-mod lfs;
-mod logger;
-mod question;
-mod shell;
+mod utils;
+mod terminal;
 
-// todo - should this ignore "branches" and use a "workspace" concept?
 // todo - change branch command for switching which branch a claim is linked to,
 // todo - separate Add command or just also use Claim?
-trait_enum! {
-    /// Commands available to the locker cli
-    #[derive(Subcommand, Debug)]
-    pub enum LockerCommand: CLICommand {
-        /// Setup for Locker
-        Init,
+/// Commands available to the locker cli
+#[enum_dispatch]
+#[derive(Subcommand, Debug, Serialize, Deserialize)]
+pub enum LockerCommand {
+    /// Setup for Locker
+    Init,
 
-        /// Claim ownership over a directory or file so that it may be worked on in the current
-        /// or specified workspace
-        Claim,
+    /// Claim ownership over a directory or file so that it may be worked on in the current
+    /// or specified workspace
+    Claim,
 
-        /// Release a directory, file, or whole workspace so it may be claimed by other workspaces
-        Release,
+    /// Release a directory, file, or whole workspace so it may be claimed by other users
+    Release,
 
-        /// Backs up changes to the remote repository
-        Save,
+    /// Backs up changes to the remote repository
+    Save,
 
-        /// Output the current status of locker
-        Status
-    }
+    /// Updates the current branch with all changes from the main branch
+    Sync,
+
+    /// Output the current status of locker
+    Status,
 }
 
 /// Primary config for this repo's locker
@@ -57,6 +59,7 @@ pub struct LockerConfig {
 }
 
 /// Global settings passed to the executed command for this run
+#[derive(Debug)]
 pub struct RunSettings<'a> {
     /// todo
     repo_path: &'a Path,
@@ -92,7 +95,7 @@ const CONFIG_PATH: &str = ".locker/config";
 const WORKSPACES_PATH: &str = ".locker/workspaces";
 
 /// Default CLI
-#[derive(Parser, Debug)]
+#[derive(Parser, Debug, Serialize, Deserialize)]
 #[command(author, version, about, long_about = None)]
 struct LockerInterface {
     /// Path to the directory of the git repo if not run from it
@@ -128,11 +131,11 @@ fn main() -> std::io::Result<()> {
     let config_path = Path::new(&config_path);
     let workspaces_path = Path::new(&workspaces_path);
 
-    let mut command = cli.command;
+    let mut commands = vec![cli.command];
 
     if !locker_path.exists() || !config_path.exists() {
         question!("Could not find configuration for Locker; Would you like to initialize this repo?" {
-            "y" => command = LockerCommand::Init(commands::Init {}),
+            "y" => commands.insert(0, LockerCommand::Init(Init {})),
             "n" => { std::process::exit(exitcode::USAGE);}
         });
     }
@@ -145,9 +148,10 @@ fn main() -> std::io::Result<()> {
         workspaces_path,
     };
 
-    // run the command
-    debug!("Running {:?}", command);
-    command.exec(settings);
+    for command in commands {
+        debug!("Running {:?}", command);
+        command.exec(&settings);
+    }
 
     Ok(())
 }

@@ -1,12 +1,14 @@
 //! Ask a question and get an answer.
 
-use crate::{debug, error};
+use std::error::Error;
+use std::io::{stdin, stdout, Write};
+
+use crossterm::{event, QueueableCommand};
 use crossterm::event::{Event, KeyCode};
 use crossterm::style::{Color, Print, SetForegroundColor};
 use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
-use crossterm::{event, execute, queue, QueueableCommand};
-use std::error::Error;
-use std::io::{stdin, stdout, Write};
+
+use crate::{debug, defer, error};
 
 /// Ask a question and get an answer.
 /// # Open ended:
@@ -42,7 +44,7 @@ macro_rules! question {
     ($msg:tt {
         $($opt:tt => $response:expr),+$(,)*
     }) => {
-        let answer = $crate::question::Question::new($msg)
+        let answer = $crate::terminal::question::Question::new($msg)
             $(.with_option($opt))+
             .ask();
 
@@ -55,35 +57,14 @@ macro_rules! question {
         }
     };
     ($msg:tt, $default:expr) => {{
-        $crate::question::Question::new($msg)
+        $crate::terminal::question::Question::new($msg)
             .with_default($default)
             .ask()
     }};
     ($msg:tt) => {{
-        $crate::question::Question::new(format!($msg))
+        $crate::terminal::question::Question::new(format!($msg))
             .ask()
     }};
-}
-
-#[doc(hidden)]
-pub fn __question(msg: String) -> String {
-    let _ = execute!(
-        stdout(),
-        SetForegroundColor(Color::Yellow),
-        Print(format!(" {msg}\n ")),
-        SetForegroundColor(Color::White),
-    );
-
-    let mut input = String::new();
-    let result = stdin().read_line(&mut input);
-
-    if let Err(e) = result {
-        error!("{:?}", e);
-        std::process::exit(exitcode::USAGE);
-    }
-
-    debug!("Input is {:?}", input);
-    input.trim().to_string()
 }
 
 /// Ask a question and get an answer.
@@ -95,22 +76,21 @@ pub struct Question {
 
 impl Question {
     /// todo
-    pub fn new(text: &str) -> Question {
-        Question {
+    pub fn new(text: &str) -> Self {
+        Self {
             text: text.into(),
             default: None,
             options: vec![],
         }
     }
-
     /// todo
-    pub fn with_default(&mut self, default: &str) -> &mut Question {
+    pub fn with_default(&mut self, default: &str) -> &mut Self {
         self.default = Some(default.into());
         self
     }
 
     /// todo
-    pub fn with_option(&mut self, option: &str) -> &mut Question {
+    pub fn with_option(&mut self, option: &str) -> &mut Self {
         self.options.push(option.into());
         self
     }

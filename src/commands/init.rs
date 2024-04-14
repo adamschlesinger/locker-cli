@@ -3,9 +3,10 @@ use crate::question::Question;
 use crate::*;
 use std::io::Write;
 use std::process::exit;
+use crate::git::lfs;
 
 impl CLICommand for Init {
-    fn exec(&self, settings: RunSettings) {
+    fn exec(&self, settings: &RunSettings) {
         header!("Starting Locker Initialization");
 
         make_locker_path(&settings);
@@ -40,7 +41,10 @@ fn ask_release_branch() -> String {
 
 fn make_locker_path(settings: &RunSettings) {
     if !settings.locker_path.exists() {
-        debug!("Creating new path for configuration files");
+        debug!(
+            "Creating new path ({:?}) for configuration files",
+            settings.locker_path
+        );
         let _ = fs::create_dir_all(settings.locker_path);
     }
 }

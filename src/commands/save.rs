@@ -1,9 +1,9 @@
 use crate::commands::{CLICommand, Save};
-use crate::{header, lfs, RunSettings};
+use crate::{header, RunSettings};
 
 // https://stackoverflow.com/questions/2481338/committing-to-a-branch-thats-not-checked-out
 impl CLICommand for Save {
-    fn exec(&self, settings: RunSettings) {
+    fn exec(&self, settings: &RunSettings) {
         header!("Saving {:?}", self.path);
 
         if self.all {

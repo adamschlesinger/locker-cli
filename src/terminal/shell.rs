@@ -5,7 +5,7 @@ use std::process::Command;
 #[macro_export]
 macro_rules! sh {
     ($arg:expr) => {
-        $crate::shell::__sh(format!($arg))
+        $crate::terminal::shell::__sh(format!($arg))
     };
 }
 

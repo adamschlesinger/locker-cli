@@ -7,18 +7,27 @@ mod init;
 mod release;
 mod save;
 mod status;
+mod sync;
 
 use crate::RunSettings;
 use clap::Args;
+use enum_dispatch::enum_dispatch;
+use serde::{Deserialize, Serialize};
 
 /// Common trait for all subcommands
+#[enum_dispatch(LockerCommand)]
 pub trait CLICommand {
     /// todo
-    fn exec(&self, settings: RunSettings);
+    fn exec(&self, settings: &RunSettings);
 }
 
-/// todo
-#[derive(Args, Debug)]
+/// Setup for Locker
+#[derive(Args, Debug, Serialize, Deserialize)]
+pub struct Init {}
+
+/// Claim ownership over a directory or file so that it may be worked on in the current
+/// or specified workspace
+#[derive(Args, Debug, Serialize, Deserialize)]
 pub struct Claim {
     /// File or directory to be claimed to the current or specified workspace.
     path: String,
@@ -30,11 +39,7 @@ pub struct Claim {
 }
 
 /// todo
-#[derive(Args, Debug)]
-pub struct Init {}
-
-/// todo
-#[derive(Args, Debug)]
+#[derive(Args, Debug, Serialize, Deserialize)]
 pub struct Release {
     /// The file or directory to be released. If not specified
     /// then all currently locked files of the current branch will be released.
@@ -47,8 +52,8 @@ pub struct Release {
     discard_changes: bool,
 }
 
-/// todo
-#[derive(Args, Debug)]
+/// Backs up changes to the remote repository
+#[derive(Args, Debug, Serialize, Deserialize)]
 pub struct Save {
     /// The file or directory with multiple claimable files to be saved
     path: Option<String>,
@@ -63,13 +68,17 @@ pub struct Save {
 }
 
 /// todo
-#[derive(Args, Debug)]
+#[derive(Args, Debug, Serialize, Deserialize)]
 pub struct Checkout {}
 
 /// todo
-#[derive(Args, Debug)]
+#[derive(Args, Debug, Serialize, Deserialize)]
 pub struct Commit {}
 
 /// Output the status of locker
-#[derive(Args, Debug)]
+#[derive(Args, Debug, Serialize, Deserialize)]
 pub struct Status {}
+
+/// Updates the current branch with all changes from the main branch
+#[derive(Args, Debug, Serialize, Deserialize)]
+pub struct Sync {}

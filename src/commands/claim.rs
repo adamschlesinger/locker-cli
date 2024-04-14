@@ -1,11 +1,12 @@
-use crate::commands::{CLICommand, Claim};
-use crate::{debug, error, header, info, lfs, RunSettings};
-use crossterm::style::{Color, Print, SetForegroundColor};
 use std::path::Path;
 use std::process;
 
+use crate::{debug, error, header, info, RunSettings};
+use crate::commands::{Claim, CLICommand};
+use crate::git::lfs;
+
 impl CLICommand for Claim {
-    fn exec(&self, settings: RunSettings) {
+    fn exec(&self, settings: &RunSettings) {
         header!("Claiming {:?}", self.path);
 
         match &self.workspace {

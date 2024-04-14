@@ -1,7 +1,7 @@
-use crate::commands::{CLICommand, Commit};
+use crate::commands::{CLICommand, Sync};
 use crate::RunSettings;
 
-impl CLICommand for Commit {
+impl CLICommand for Sync {
     fn exec(&self, settings: &RunSettings) {
         todo!();
     }

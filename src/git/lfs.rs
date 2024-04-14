@@ -1,6 +1,7 @@
-use crate::sh;
-use crate::shell::Result;
+use crate::terminal::shell::Result;
 use std::io;
+use crate::sh;
+
 
 /// todo
 pub fn version() -> Result {

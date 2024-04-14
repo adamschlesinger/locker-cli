@@ -8,17 +8,20 @@ readme = "README.md"
 license = "MIT OR Apache-2.0"
 keywords = ["git", "lfs", "binaries", "assets"]
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
 locker-derive = { path = "locker-derive" }
 clap = { version = "4.1.6", features = ["derive", "color"] }
+clap_complete = "4.5.2"
 ctrlc = "3.2.1"
-confy = "0.5.1"
+confy = "0.6.1"
+enum_dispatch = "0.3.13"
 exitcode = "1.1.2"
-trait_enum = "0.5.0"
-crossterm = "0.26.0"
+crossterm = "0.27.0"
 serde = { version = "1.0.147", features = ["derive"] }
 once_cell = "1.16.0"
-toml = "0.7.2"
-time = "0.3.17"
+toml = "0.8.12"
+chrono = "0.4.37"
+
+[build-dependencies]
+clap = { version = "4.1.6", features = ["derive", "color"] }
+clap_mangen = "0.2.20"
