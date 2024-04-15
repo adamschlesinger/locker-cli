@@ -1,11 +1,20 @@
 use crate::{debug, error};
 use std::process::Command;
 
-/// Executes the cmd and returns when done
+/// Executes the cmd and returns when done.
 #[macro_export]
 macro_rules! sh {
     ($arg:expr) => {
         $crate::terminal::shell::__sh(format!($arg))
+    };
+}
+
+/// Executes the cmd and returns when done. Exits on error.
+#[macro_export]
+macro_rules! sh_exit {
+    ($arg:expr) => {
+        $crate::terminal::shell::__sh(format!($arg))
+            .unwrap_or_else(|err| std::process::exit(err.code))
     };
 }
 

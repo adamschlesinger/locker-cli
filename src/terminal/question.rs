@@ -102,7 +102,21 @@ impl Question {
     pub fn ask(&self) -> String {
         print_question(self)
             .expect("Could not print question.");
+
         get_input(self)
+            
+        // if self.options.iter().all(|opt| opt.len() == 1) {
+        //     let opt_chars: Vec<char> = self.options.iter()
+        //         .map(|opt| opt.chars()
+        //             .next()
+        //             .unwrap())
+        //         .collect();
+        // 
+        //     get_input_char(&opt_chars)
+        //         .expect("Failed to get input")
+        // } else {
+        //     get_input(self)
+        // }
     }
 }
 
@@ -138,21 +152,20 @@ fn print_question(question: &Question) -> Result<(), std::io::Error> {
 
 fn get_input(question: &Question) -> String {
     let mut input = String::new();
-    let result = stdin().read_line(&mut input);
+    stdin().read_line(&mut input)
+        .unwrap_or_else(|err| {
+            error!("{:?}", err);
+            exit(exitcode::USAGE);
+        });
 
-    if let Err(e) = result {
-        error!("{:?}", e);
-        exit(exitcode::USAGE);
-    }
-
-    // todo - how to go back to the previous line?
     if let Some(default) = &question.default {
         if input == "\n" {
+            input = default.clone();
             let _ = execute!(
                 stdout(),
                 MoveUp(1),
                 MoveToColumn(timestamp().len() as u16),
-                Print(format!(" {default}\n")),
+                Print(format!(" {input}\n")),
             );
         }
     }
@@ -161,7 +174,7 @@ fn get_input(question: &Question) -> String {
     input.trim().to_string()
 }
 
-fn get_input_char(options: &[char]) -> Result<char, Box<dyn Error>> {
+fn get_input_char(options: &[char]) -> Result<String, Box<dyn Error>> {
     enable_raw_mode()?;
 
     let event = loop {
@@ -170,14 +183,18 @@ fn get_input_char(options: &[char]) -> Result<char, Box<dyn Error>> {
         }
     };
 
+    disable_raw_mode()?;
+
     for opt in options {
         if event.code == KeyCode::Char(*opt) {
-            disable_raw_mode()?;
-            return Ok(*opt);
+            return Ok(opt.to_string());
         }
     }
 
-    disable_raw_mode()?;
+    let _ = execute!(
+        stdout(),
+        Print(format!("{:?}\n", event.code)),
+    );
 
     error!("Invalid Input");
     exit(exitcode::USAGE);

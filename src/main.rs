@@ -20,8 +20,6 @@ mod git;
 mod utils;
 mod terminal;
 
-// todo - change branch command for switching which branch a claim is linked to,
-// todo - separate Add command or just also use Claim?
 /// Commands available to the locker cli
 #[enum_dispatch]
 #[derive(Subcommand, Debug, Serialize, Deserialize)]
@@ -91,11 +89,6 @@ pub struct WorkspaceConfig {
     /// All paths currently owned by this workspace
     paths: Vec<String>,
 }
-
-// todo - should workspace info be local only or remote?
-// What do we gain by it being remote?
-// - Ability to see the status of other workspaces.
-// - Can we do it in a hidden way with some weird ass lfs commands?
 
 const LOCKER_PATH: &str = ".locker";
 const CONFIG_PATH: &str = ".locker/config";
