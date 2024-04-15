@@ -2,13 +2,16 @@
 
 use std::error::Error;
 use std::io::{stdin, stdout, Write};
+use std::process::exit;
 
-use crossterm::{event, QueueableCommand};
+use crossterm::{event, execute, QueueableCommand};
+use crossterm::cursor::{MoveToColumn, MoveUp};
 use crossterm::event::{Event, KeyCode};
 use crossterm::style::{Color, Print, SetForegroundColor};
 use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
 
-use crate::{debug, defer, error};
+use crate::{debug, error};
+use crate::utils::timestamp;
 
 /// Ask a question and get an answer.
 /// # Open ended:
@@ -97,40 +100,61 @@ impl Question {
 
     /// todo
     pub fn ask(&self) -> String {
-        let _ = print_question(self);
-        get_input()
+        print_question(self)
+            .expect("Could not print question.");
+        get_input(self)
     }
 }
 
 fn print_question(question: &Question) -> Result<(), std::io::Error> {
     let mut stdout = stdout();
+    stdout.queue(SetForegroundColor(Color::Grey))?;
+    stdout.queue(Print(timestamp()))?;
     stdout.queue(SetForegroundColor(Color::Yellow))?;
-    stdout.queue(Print(format!(" {}", &question.text)))?;
+    stdout.queue(Print(format!(" {} ", &question.text)))?;
 
     if !question.options.is_empty() {
-        let mut index = 1;
+        stdout.queue(Print("("))?;
         for option in &question.options {
-            stdout.queue(Print(format!("\n [{index}] {option}")))?;
-            index += 1;
+            stdout.queue(Print(option))?;
+
+            if question.options.last().unwrap() != option {
+                stdout.queue(Print("/"))?;
+            }
         }
+        stdout.queue(Print(")"))?;
     } else if let Some(default) = &question.default {
-        stdout.queue(Print(format!(" Hit ENTER to use default ({default})")))?;
+        stdout.queue(Print(format!("Hit ENTER to use default ({default})")))?;
     }
 
-    stdout.queue(Print("\n "))?;
+    stdout.queue(Print("\n"))?;
+    stdout.queue(SetForegroundColor(Color::Grey))?;
+    stdout.queue(Print(format!("{} ", timestamp())))?;
     stdout.queue(SetForegroundColor(Color::White))?;
     stdout.flush()?;
 
     Ok(())
 }
 
-fn get_input() -> String {
+fn get_input(question: &Question) -> String {
     let mut input = String::new();
     let result = stdin().read_line(&mut input);
 
     if let Err(e) = result {
         error!("{:?}", e);
-        std::process::exit(exitcode::USAGE);
+        exit(exitcode::USAGE);
+    }
+
+    // todo - how to go back to the previous line?
+    if let Some(default) = &question.default {
+        if input == "\n" {
+            let _ = execute!(
+                stdout(),
+                MoveUp(1),
+                MoveToColumn(timestamp().len() as u16),
+                Print(format!(" {default}\n")),
+            );
+        }
     }
 
     debug!("Input is {:?}", input);
@@ -156,5 +180,5 @@ fn get_input_char(options: &[char]) -> Result<char, Box<dyn Error>> {
     disable_raw_mode()?;
 
     error!("Invalid Input");
-    std::process::exit(exitcode::USAGE);
+    exit(exitcode::USAGE);
 }

@@ -1,8 +1,8 @@
 use crate::commands::{CLICommand, Checkout};
-use crate::RunSettings;
+use crate::RunConfig;
 
 impl CLICommand for Checkout {
-    fn exec(&self, settings: &RunSettings) {
+    fn exec(&self, run_config: &RunConfig) {
         todo!();
     }
 }

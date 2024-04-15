@@ -1,4 +1,3 @@
-use std::time::SystemTime;
 use chrono::{DateTime, Local, Timelike};
 
 /// todo
@@ -22,11 +21,6 @@ impl<F: FnMut()> Drop for Deferral<F> {
 
 /// todo
 pub fn timestamp() -> String {
-    let now: DateTime<Local> = SystemTime::now().into();
-    format!(
-        "[{:0>2}:{:0>2}:{:0>2}]",
-        now.hour(),
-        now.minute(),
-        now.second()
-    )
+    let now: DateTime<Local> = Local::now();
+    format!("[{:}]", now.format("%H:%M:%S%.3f"))
 }

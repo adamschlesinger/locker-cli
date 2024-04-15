@@ -1,8 +1,8 @@
 use crate::commands::{CLICommand, Sync};
-use crate::RunSettings;
+use crate::{header, RunConfig};
 
 impl CLICommand for Sync {
-    fn exec(&self, settings: &RunSettings) {
-        todo!();
+    fn exec(&self, run_config: &RunConfig) {
+        header!("Syncing");
     }
 }

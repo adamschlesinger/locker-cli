@@ -1,8 +1,10 @@
 extern crate core;
 
+use std::error::Error;
 use std::fs;
 use std::fs::File;
 use std::path::Path;
+use std::process::exit;
 
 use clap::{Parser, Subcommand};
 use enum_dispatch::enum_dispatch;
@@ -26,6 +28,12 @@ mod terminal;
 pub enum LockerCommand {
     /// Setup for Locker
     Init,
+
+    /// Create a new workspace
+    New,
+
+    /// Switch to another workspace and claim all files owned by it
+    Switch,
 
     /// Claim ownership over a directory or file so that it may be worked on in the current
     /// or specified workspace
@@ -59,25 +67,24 @@ pub struct LockerConfig {
 }
 
 /// Global settings passed to the executed command for this run
-#[derive(Debug)]
-pub struct RunSettings<'a> {
+#[derive(Debug, Serialize, Deserialize)]
+pub struct RunConfig {
     /// todo
-    repo_path: &'a Path,
+    repo_path: String,
 
     /// todo
-    locker_path: &'a Path,
+    locker_path: String,
 
     /// todo
-    config_path: &'a Path,
+    config_path: String,
 
     /// todo
-    workspaces_path: &'a Path,
+    workspaces_path: String,
 }
 
-/// Local file describing the created workspaces. Removed
-/// when the workspace is submitted for review.
+/// Local file describing the created workspaces. Removed when the workspace is submitted for review.
 #[derive(Debug, Serialize, Deserialize)]
-pub struct Workspace {
+pub struct WorkspaceConfig {
     /// Name given to the workspace
     name: String,
 
@@ -92,6 +99,7 @@ pub struct Workspace {
 
 const LOCKER_PATH: &str = ".locker";
 const CONFIG_PATH: &str = ".locker/config";
+const CURRENT_WORKSPACE_PATH: &str = ".locker/current_workspace";
 const WORKSPACES_PATH: &str = ".locker/workspaces";
 
 /// Default CLI
@@ -111,7 +119,7 @@ struct LockerInterface {
     command: LockerCommand,
 }
 
-fn main() -> std::io::Result<()> {
+fn main() -> Result<(), Box<dyn Error>> {
     let cli = LockerInterface::parse();
     logger::init(cli.log_level);
 
@@ -125,32 +133,34 @@ fn main() -> std::io::Result<()> {
     let workspaces_path = format!("{repo_path}/{WORKSPACES_PATH}");
     debug!("Locker main path => {locker_path}");
 
-    debug!("Attempting to load configuration at {config_path}");
-    let repo_path = Path::new(&repo_path);
-    let locker_path = Path::new(&locker_path);
-    let config_path = Path::new(&config_path);
-    let workspaces_path = Path::new(&workspaces_path);
-
-    let mut commands = vec![cli.command];
-
-    if !locker_path.exists() || !config_path.exists() {
-        question!("Could not find configuration for Locker; Would you like to initialize this repo?" {
-            "y" => commands.insert(0, LockerCommand::Init(Init {})),
-            "n" => { std::process::exit(exitcode::USAGE);}
-        });
-    }
-
     debug!("Building run settings");
-    let settings = RunSettings {
+    let run_config = RunConfig {
         repo_path,
         locker_path,
         config_path,
         workspaces_path,
     };
 
-    for command in commands {
-        debug!("Running {:?}", command);
-        command.exec(&settings);
+    if let LockerCommand::Init(command) = cli.command {
+        command.exec(&run_config);
+    } else {
+        let mut commands = vec![cli.command];
+
+        debug!("Attempting to load configuration at {}", run_config.config_path);
+        let locker_path = Path::new(&run_config.locker_path);
+        let config_path = Path::new(&run_config.config_path);
+
+        if !locker_path.exists() || !config_path.exists() {
+            question!("Could not find configuration for Locker; Would you like to initialize this repo?" {
+                "y" => commands.insert(0, LockerCommand::Init(Init {})),
+                "n" => { exit(exitcode::USAGE);}
+            });
+        }
+
+        for command in commands {
+            debug!("Running {:?}", command);
+            command.exec(&run_config);
+        }
     }
 
     Ok(())

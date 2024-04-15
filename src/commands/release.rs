@@ -1,8 +1,10 @@
 use crate::commands::{CLICommand, Release};
-use crate::RunSettings;
+use crate::{header, RunConfig};
 
 impl CLICommand for Release {
-    fn exec(&self, settings: &RunSettings) {
+    fn exec(&self, run_config: &RunConfig) {
+        header!("Releasing {:?}", self.path);
+
         match &self.path {
             Some(path) => {}
             None => {

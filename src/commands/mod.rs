@@ -8,9 +8,11 @@ mod release;
 mod save;
 mod status;
 mod sync;
+mod new;
+mod switch;
 
-use crate::RunSettings;
-use clap::Args;
+use crate::{LockerCommand, RunConfig};
+use clap::{Args, Subcommand};
 use enum_dispatch::enum_dispatch;
 use serde::{Deserialize, Serialize};
 
@@ -18,7 +20,7 @@ use serde::{Deserialize, Serialize};
 #[enum_dispatch(LockerCommand)]
 pub trait CLICommand {
     /// todo
-    fn exec(&self, settings: &RunSettings);
+    fn exec(&self, run_config: &RunConfig);
 }
 
 /// Setup for Locker
@@ -82,3 +84,14 @@ pub struct Status {}
 /// Updates the current branch with all changes from the main branch
 #[derive(Args, Debug, Serialize, Deserialize)]
 pub struct Sync {}
+
+/// Create a new workspace
+#[derive(Args, Debug, Serialize, Deserialize)]
+pub struct New {
+    /// Name of the workspace to create
+    name: String,
+}
+
+/// Switch to another workspace and claim all files owned by it
+#[derive(Args, Debug, Serialize, Deserialize)]
+pub struct Switch {}

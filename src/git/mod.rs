@@ -1,5 +1,5 @@
 use crate::sh;
-use std::process;
+use std::process::exit;
 
 pub mod lfs;
 
@@ -9,7 +9,7 @@ pub fn origin_default() -> String {
     // return sh!("git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@'");
     match sh!("git rev-parse --abbrev-ref origin/HEAD") {
         Ok(branch) => branch,
-        Err(err) => process::exit(err.code),
+        Err(err) => exit(err.code),
     }
 }
 
@@ -22,6 +22,31 @@ pub fn repo_absolute_path(input_path: Option<String>) -> String {
 
     match cmd_output {
         Ok(path) => path,
-        Err(err) => process::exit(err.code),
+        Err(err) => exit(err.code),
     }
+}
+
+/// todo
+pub fn commit(message: &str, paths: Vec<&str>) {
+    let paths_string = reduce_paths(paths);
+    if let Err(err) = sh!("git commit -m \"{message}\" {paths_string}") {
+        exit(err.code);
+    }
+}
+
+/// todo
+pub fn add(paths: Vec<&str>) {
+    let paths_string = reduce_paths(paths);
+    if let Err(err) = sh!("git add -f {paths_string}") {
+        exit(err.code);
+    }
+}
+
+fn reduce_paths(paths: Vec<&str>) -> String {
+    paths.iter()
+        .map(|&s| s.to_string())
+        .reduce(|acc, s| {
+            if acc.is_empty() { s } else { format!("{} {}", acc, s) }
+        })
+        .expect("Failed to reduce paths")
 }

@@ -1,12 +1,12 @@
 use std::path::Path;
 use std::process;
 
-use crate::{debug, error, header, info, RunSettings};
+use crate::{debug, error, header, info, RunConfig};
 use crate::commands::{Claim, CLICommand};
 use crate::git::lfs;
 
 impl CLICommand for Claim {
-    fn exec(&self, settings: &RunSettings) {
+    fn exec(&self, run_config: &RunConfig) {
         header!("Claiming {:?}", self.path);
 
         match &self.workspace {

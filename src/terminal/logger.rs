@@ -69,7 +69,7 @@ pub fn __log(level: LogLevel, msg: String) {
             if level >= *logger_level {
                 let _ = execute!(
                     stdout(),
-                    SetForegroundColor(Color::White),
+                    SetForegroundColor(Color::Grey),
                     Print(timestamp()),
                     SetForegroundColor(color(&level)),
                     Print(format!(" {msg}\n")),
@@ -81,13 +81,19 @@ pub fn __log(level: LogLevel, msg: String) {
 
 #[doc(hidden)]
 pub fn __header(msg: String) {
+    let dashes: String = msg.chars().map(|_| '_').collect();
     let _ = execute!(
         stdout(),
-        Print('\n'),
-        SetForegroundColor(Color::White),
+        SetForegroundColor(Color::Grey),
+        Print(timestamp()),
+        Print("\n"),
         Print(timestamp()),
         SetForegroundColor(Color::Green),
         Print(format!(" {msg}\n")),
+        SetForegroundColor(Color::Grey),
+        Print(timestamp()),
+        SetForegroundColor(Color::Green),
+        Print(format!(" {dashes}\n")),
     );
 }
 
@@ -95,9 +101,8 @@ pub fn __header(msg: String) {
 pub fn __debug(msg: String) {
     let _ = execute!(
         stdout(),
-        SetForegroundColor(Color::White),
-        Print(timestamp()),
         SetForegroundColor(Color::Grey),
+        Print(timestamp()),
         Print(format!(" {msg}\n")),
     );
 }

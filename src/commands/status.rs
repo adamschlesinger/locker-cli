@@ -1,9 +1,9 @@
 use crate::commands::{CLICommand, Status};
-use crate::{header, info, RunSettings};
+use crate::{header, info, RunConfig};
 use crate::git::lfs;
 
 impl CLICommand for Status {
-    fn exec(&self, settings: &RunSettings) {
+    fn exec(&self, run_config: &RunConfig) {
         let lfs_locks = lfs::locked_files();
 
         // current workspace info
