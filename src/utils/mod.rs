@@ -22,5 +22,5 @@ impl<F: FnMut()> Drop for Deferral<F> {
 /// todo
 pub fn timestamp() -> String {
     let now: DateTime<Local> = Local::now();
-    format!("[{:}]", now.format("%H:%M:%S%.3f"))
+    format!("[{:.11}]", now.format("%H:%M:%S%.3f"))
 }
