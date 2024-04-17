@@ -3,6 +3,7 @@ use crate::question::Question;
 use crate::*;
 use std::io::Write;
 use std::process::exit;
+use crate::config::RepoConfig;
 use crate::git::lfs;
 
 impl CLICommand for Init {
@@ -34,7 +35,7 @@ impl CLICommand for Init {
             exit(exitcode::UNAVAILABLE);
         }
 
-        let config = LockerConfig {
+        let config = RepoConfig {
             release_branch,
             workspace_branch_pattern: None,
             require_review: false,

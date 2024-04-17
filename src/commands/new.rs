@@ -3,7 +3,8 @@ use std::fs::File;
 use std::io::Write;
 use std::path::Path;
 use crate::commands::{CLICommand, New};
-use crate::{debug, header, RunConfig, WorkspaceConfig};
+use crate::{debug, header, RunConfig};
+use crate::config::WorkspaceConfig;
 
 impl CLICommand for New {
     fn exec(&self, run_config: &RunConfig) {
@@ -11,7 +12,7 @@ impl CLICommand for New {
 
         let workspace_config = WorkspaceConfig {
             name: self.name.clone(),
-            paths: vec![],
+            owned_paths: vec![],
         };
 
         let workspaces_path = Path::new(&run_config.workspaces_path);

@@ -1,4 +1,5 @@
-extern crate core;
+//! todo
+//!
 
 use std::error::Error;
 use std::fs;
@@ -10,7 +11,9 @@ use clap::{Parser, Subcommand};
 use enum_dispatch::enum_dispatch;
 use serde::{Deserialize, Serialize};
 
+use crate::defaults::*;
 use crate::commands::*;
+use crate::config::RunConfig;
 use crate::terminal::logger;
 use crate::terminal::logger::LogLevel;
 use crate::terminal::question;
@@ -19,6 +22,8 @@ mod commands;
 mod git;
 mod utils;
 mod terminal;
+mod config;
+mod defaults;
 
 /// Commands available to the locker cli
 #[enum_dispatch]
@@ -50,51 +55,6 @@ pub enum LockerCommand {
     Status,
 }
 
-/// Primary config for this repo's locker
-#[derive(Debug, Serialize, Deserialize)]
-pub struct LockerConfig {
-    /// When files or workspaces are released what branch are they merged in to?
-    release_branch: String,
-
-    /// eg: claim/*, feature/*, etc. Supports options such as claim/{file_name}
-    /// If not specified then users will be have to specify their own branch on Claim
-    workspace_branch_pattern: Option<String>,
-
-    /// Do returned files require a review step before merging into release_branch?
-    require_review: bool,
-}
-
-/// Global settings passed to the executed command for this run
-#[derive(Debug, Serialize, Deserialize)]
-pub struct RunConfig {
-    /// todo
-    repo_path: String,
-
-    /// todo
-    locker_path: String,
-
-    /// todo
-    config_path: String,
-
-    /// todo
-    workspaces_path: String,
-}
-
-/// Local file describing the created workspaces. Removed when the workspace is submitted for review.
-#[derive(Debug, Serialize, Deserialize)]
-pub struct WorkspaceConfig {
-    /// Name given to the workspace
-    name: String,
-
-    /// All paths currently owned by this workspace
-    paths: Vec<String>,
-}
-
-const LOCKER_PATH: &str = ".locker";
-const CONFIG_PATH: &str = ".locker/config";
-const CURRENT_WORKSPACE_PATH: &str = ".locker/current_workspace";
-const WORKSPACES_PATH: &str = ".locker/workspaces";
-
 /// Default CLI
 #[derive(Parser, Debug, Serialize, Deserialize)]
 #[command(author, version, about, long_about = None)]
@@ -116,7 +76,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let cli = LockerInterface::parse();
     logger::init(cli.log_level);
 
-    header!("Starting Locker 🔐");
+    header!("Starting Locker");
     info!("Asset control in git for humans");
 
     debug!("Establishing paths");

@@ -3,6 +3,7 @@ use std::process;
 
 use crate::{debug, error, header, info, RunConfig};
 use crate::commands::{Claim, CLICommand};
+use crate::config::{TOMLConfig, WorkspaceConfig};
 use crate::git::lfs;
 
 impl CLICommand for Claim {
@@ -11,6 +12,8 @@ impl CLICommand for Claim {
 
         match &self.workspace {
             Some(workspace) => {
+                let path = format!("{}/current_workspace", run_config.locker_path);
+                let ws = WorkspaceConfig::load(&path);
                 // is this the workspace we are in now?
                 //   yes - break
                 //   no - does this workspace already exist?
