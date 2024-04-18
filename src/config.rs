@@ -46,7 +46,7 @@ pub struct RepoConfig {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct RunConfig {
     /// todo
-    pub repo: RepoConfig,
+    pub repo: Option<RepoConfig>,
 
     /// todo
     pub current_workspace: Option<WorkspaceConfig>,
@@ -93,7 +93,7 @@ fn load_toml<S: AsRef<str> + Display, D: DeserializeOwned>(path: &S) -> Option<D
     let exists = path.try_exists()
         .unwrap_or_else(|e| panic!("{e}"));
 
-    if exists {
+    if !exists {
         return None;
     }
 

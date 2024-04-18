@@ -88,7 +88,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     debug!("Building run settings");
     let run_config = RunConfig {
-        repo: RepoConfig::load().unwrap(),
+        repo: RepoConfig::load(),
         current_workspace: None,
         workspaces: vec![],
     };
