@@ -7,10 +7,10 @@ use crate::config::RepoConfig;
 use crate::git::lfs;
 
 impl CLICommand for Init {
-    fn exec(&self, run_config: &RunConfig) {
-        header!("Starting Locker Initialization");
+    fn exec(self, run_config: &RunConfig) {
+        header!("Initializing...");
 
-        let locker_path = Path::new(&run_config.locker_path);
+        let locker_path = Path::new(LOCKER_PATH);
         if !locker_path.exists() {
             debug!("Creating new path ({:?}) for configuration files", locker_path);
             let _ = fs::create_dir_all(locker_path);
@@ -39,10 +39,11 @@ impl CLICommand for Init {
             release_branch,
             workspace_branch_pattern: None,
             require_review: false,
+            path: "".to_string(),
         };
 
-        info!("Creating new config file @ {}", run_config.config_path);
-        let config_path = Path::new(&run_config.config_path);
+        info!("Creating new config file @ {}", CONFIG_PATH);
+        let config_path = Path::new(CONFIG_PATH);
         let cfg_str = toml::to_string(&config).unwrap();
         let mut file = File::create(config_path).unwrap();
         let _ = file.write_all(cfg_str.as_bytes());

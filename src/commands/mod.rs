@@ -20,7 +20,7 @@ use serde::{Deserialize, Serialize};
 #[enum_dispatch(LockerCommand)]
 pub trait CLICommand {
     /// todo
-    fn exec(&self, run_config: &RunConfig);
+    fn exec(self, run_config: &RunConfig);
 }
 
 /// Setup for Locker

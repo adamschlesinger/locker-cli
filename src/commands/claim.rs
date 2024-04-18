@@ -1,34 +1,22 @@
 use std::path::Path;
-use std::process;
 
-use crate::{debug, error, header, info, RunConfig};
+use crate::{debug, header, info, RunConfig};
 use crate::commands::{Claim, CLICommand};
-use crate::config::{TOMLConfig, WorkspaceConfig};
+use crate::config::WorkspaceConfig;
 use crate::git::lfs;
 
 impl CLICommand for Claim {
-    fn exec(&self, run_config: &RunConfig) {
+    fn exec(self, run_config: &RunConfig) {
         header!("Claiming {:?}", self.path);
 
-        match &self.workspace {
-            Some(workspace) => {
-                let path = format!("{}/current_workspace", run_config.locker_path);
-                let ws = WorkspaceConfig::load(&path);
-                // is this the workspace we are in now?
-                //   yes - break
-                //   no - does this workspace already exist?
-                //     no - make it
-                // switch to workspace
-            }
-            None => {
-                debug!("No workspace specified. Checking if one is currently active.");
-                // todo
+        // let workspace = self.workspace
+        //     .map_or_else(|| run_config.current_workspace, |ws_name| {
+        //         Some(WorkspaceConfig::load(&ws_name)
+        //             .unwrap_or(WorkspaceConfig::new(&ws_name)))
+        //     })
+        //     .expect("Not in a workspace and none specified!");
 
-                // no - error
-                error!("Not in a workspace and none specified");
-                process::exit(exitcode::USAGE);
-            }
-        };
+        // todo - make sure we have permissions to act on the workspace
 
         // does path exist?
         if Path::new(&self.path).exists() {

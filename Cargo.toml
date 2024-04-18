@@ -10,9 +10,9 @@ keywords = ["git", "lfs", "binaries", "assets"]
 
 [dependencies]
 locker-derive = { path = "locker-derive" }
-clap = { version = "4.1.6", features = ["derive", "color"] }
+clap = { version = "4.5.4", features = ["derive", "color"] }
 clap_complete = "4.5.2"
-ctrlc = "3.2.1"
+ctrlc = "3.4.4"
 confy = "0.6.1"
 enum_dispatch = "0.3.13"
 exitcode = "1.1.2"

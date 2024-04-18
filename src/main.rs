@@ -2,7 +2,7 @@
 //!
 
 use std::error::Error;
-use std::fs;
+use std::{env, fs};
 use std::fs::File;
 use std::path::Path;
 use std::process::exit;
@@ -13,7 +13,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::defaults::*;
 use crate::commands::*;
-use crate::config::RunConfig;
+use crate::config::{RepoConfig, RunConfig};
 use crate::terminal::logger;
 use crate::terminal::logger::LogLevel;
 use crate::terminal::question;
@@ -22,6 +22,7 @@ mod commands;
 mod git;
 mod utils;
 mod terminal;
+mod dependencies;
 mod config;
 mod defaults;
 
@@ -55,7 +56,7 @@ pub enum LockerCommand {
     Status,
 }
 
-/// Default CLI
+/// Primary CLI
 #[derive(Parser, Debug, Serialize, Deserialize)]
 #[command(author, version, about, long_about = None)]
 struct LockerInterface {
@@ -79,19 +80,18 @@ fn main() -> Result<(), Box<dyn Error>> {
     header!("Starting Locker");
     info!("Asset control in git for humans");
 
-    debug!("Establishing paths");
+    debug!("Getting repo's base path");
     let repo_path = git::repo_absolute_path(cli.directory);
-    let locker_path = format!("{repo_path}/{LOCKER_PATH}");
-    let config_path = format!("{repo_path}/{CONFIG_PATH}");
-    let workspaces_path = format!("{repo_path}/{WORKSPACES_PATH}");
-    debug!("Locker main path => {locker_path}");
+
+    debug!("Changing executing dir to {repo_path}");
+    env::set_current_dir(repo_path)
+        .expect("Could not change directory");
 
     debug!("Building run settings");
     let run_config = RunConfig {
-        repo_path,
-        locker_path,
-        config_path,
-        workspaces_path,
+        repo: RepoConfig::load().unwrap(),
+        current_workspace: None,
+        workspaces: vec![],
     };
 
     if let LockerCommand::Init(command) = cli.command {
@@ -99,9 +99,9 @@ fn main() -> Result<(), Box<dyn Error>> {
     } else {
         let mut commands = vec![cli.command];
 
-        debug!("Attempting to load configuration at {}", run_config.config_path);
-        let locker_path = Path::new(&run_config.locker_path);
-        let config_path = Path::new(&run_config.config_path);
+        debug!("Attempting to load configuration at {}", CONFIG_PATH);
+        let locker_path = Path::new(LOCKER_PATH);
+        let config_path = Path::new(CONFIG_PATH);
 
         if !locker_path.exists() || !config_path.exists() {
             question!("Could not find configuration for Locker; Would you like to initialize this repo?" {

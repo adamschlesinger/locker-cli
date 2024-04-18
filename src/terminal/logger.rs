@@ -81,6 +81,7 @@ pub fn __log(level: LogLevel, msg: String) {
 
 #[doc(hidden)]
 pub fn __header(msg: String) {
+    let msg = format!("=== {msg} ===");
     let dashes: String = msg.chars().map(|_| '_').collect();
     let _ = execute!(
         stdout(),
