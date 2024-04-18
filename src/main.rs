@@ -22,7 +22,6 @@ mod commands;
 mod git;
 mod utils;
 mod terminal;
-mod dependencies;
 mod config;
 mod defaults;
 
